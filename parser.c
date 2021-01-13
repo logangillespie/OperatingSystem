@@ -18,6 +18,7 @@ int main()
 {
 	while (1) {
 		printf("> ");
+		int one; 
 
 		/* input contains the whole command
 		 * tokens contains substrings from input split by spaces
