@@ -14,6 +14,8 @@ tokenlist *new_tokenlist(void);
 void add_token(tokenlist *tokens, char *item);
 void free_tokens(tokenlist *tokens);
 
+void environmentVariables(tokenlist *tokens);
+
 int main()
 {
 	while (1) {
@@ -111,4 +113,8 @@ void free_tokens(tokenlist *tokens)
 		free(tokens->items[i]);
 
 	free(tokens);
+}
+void environmentVariables(tokenlist *tokens)
+{
+	char *env 
 }
