@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 typedef struct {
 	int size;
@@ -14,13 +15,14 @@ tokenlist *new_tokenlist(void);
 void add_token(tokenlist *tokens, char *item);
 void free_tokens(tokenlist *tokens);
 
-bool tokenCheck(tokenlist *token); /* checks if valid command using getenv*/
+bool tokenCheck(char *token);
+bool dollarSignCheck(char *token);
+char *searchDollar(char *token);
 
 int main()
 {
 	while (1) {
 		printf("> ");
-
 
 		/* input contains the whole command
 		 * tokens contains substrings from input split by spaces
@@ -30,9 +32,31 @@ int main()
 		printf("whole input: %s\n", input);
 
 		tokenlist *tokens = get_tokens(input);
+		//char *newToken, dollarCheck, command;
+
 		for (int i = 0; i < tokens->size; i++) {
 			printf("token %d: (%s)\n", i, tokens->items[i]);
+
+			char *newToken = tokens->items[i];
+			if(dollarSignCheck(newToken) == true){
+				char* hasDollar=searchDollar(newToken);
+				if(tokenCheck(hasDollar) == true){
+					hasDollar = getenv(hasDollar);
+					printf("%s\n", hasDollar );
+				}
+			}
+
+			//dollarCheck=searchDollar(newToken);
+		/*	if(tokenCheck(dollarCheck) == true){
+				command = getenv(dollarCheck);
+				printf("%s main\n", command);
+			} */
+
 		}
+	//	printf("hi\n");
+	//	printf("%s\n", tokens->items[0]);
+	//		printf("%s\n", tokens->items[1]);
+	//		printf("done\n");
 
 		free(input);
 		free_tokens(tokens);
@@ -99,7 +123,7 @@ tokenlist *get_tokens(char *input)
 
 	char *tok = strtok(buf, " ");
 	while (tok != NULL) {
-		add_token(tokens, tok);
+		add_token(tokens, tok); //tok is individual word
 		tok = strtok(NULL, " ");
 	}
 
@@ -114,10 +138,28 @@ void free_tokens(tokenlist *tokens)
 
 	free(tokens);
 }
-
-bool tokenCheck(tokenlist *token){
+bool tokenCheck(char *token){
 	char *check = getenv(token);
+//	printf("%sfunction tokencheck\n", check);
 	if(check != NULL)
 		return true;
 	return false;
+}
+bool dollarSignCheck(char *token){
+		if(token[0] == '$')
+			return true;
+		return false;
+}
+char *searchDollar(char* token){
+	size_t len = strlen(token);
+	char* substr;
+	for(int i = 0; i<len; i++){
+		if(token[i] == '$'){
+		//	printf("%sfunction SD \n", token);
+		//	printf("   ");
+			substr = token + 1;
+		//	printf("%sfunction SD \n", substr);
+		}
+	}
+	return substr;
 }
