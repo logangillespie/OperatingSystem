@@ -131,11 +131,11 @@ void prompt() // for part 3 of the project
 	//my plan as of now is to wait til we have the env variables from part 1 set up and then just call the variable names instead of the hardcoded stuff i have now 
 	//also this might not end up being a void function
 
-	 printf("USUER");
+	 printf(getenv("USER"));
 	 printf("@");
-	 printf("MACHINE");
+	 printf(getenv("MACHINE"));
 	 printf(":");
-	 printf("PWD");
+	 printf(getenv("PWD"));
 	 printf(">\n");
 
 
