@@ -3,7 +3,7 @@
 #include <string.h>
 
 void prompt(); // logan added this for part 3
-
+void tilde_expansion(); //logan added this for part 4
 
 typedef struct {
 	int size;
@@ -40,6 +40,7 @@ int main()
 		free_tokens(tokens);
 
 		prompt(); // this is here as a test for part 3
+		tilde_expansion();
 	}
 
 	
@@ -135,9 +136,19 @@ void prompt() // for part 3 of the project
 	 printf("MACHINE");
 	 printf(":");
 	 printf("PWD");
-	 printf(">");
+	 printf(">\n");
 
 
+}
+
+
+void tilde_expansion()
+{
+	
+	if('~'){
+		printf("The $HOME env\n");
+
+	}
 
 
 }
