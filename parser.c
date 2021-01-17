@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+void prompt(); // logan added this for part 3
+
+
 typedef struct {
 	int size;
 	char **items;
@@ -14,8 +17,10 @@ tokenlist *new_tokenlist(void);
 void add_token(tokenlist *tokens, char *item);
 void free_tokens(tokenlist *tokens);
 
+
 int main()
 {
+
 	while (1) {
 		printf("> ");
 
@@ -33,9 +38,14 @@ int main()
 
 		free(input);
 		free_tokens(tokens);
+
+		prompt(); // this is here as a test for part 3
 	}
 
+	
 	return 0;
+
+	
 }
 
 tokenlist *new_tokenlist(void)
@@ -110,4 +120,24 @@ void free_tokens(tokenlist *tokens)
 		free(tokens->items[i]);
 
 	free(tokens);
+}
+
+
+
+
+void prompt() // for part 3 of the project
+{
+	//my plan as of now is to wait til we have the env variables from part 1 set up and then just call the variable names instead of the hardcoded stuff i have now 
+	//also this might not end up being a void function
+
+	 printf("USUER");
+	 printf("@");
+	 printf("MACHINE");
+	 printf(":");
+	 printf("PWD");
+	 printf(">");
+
+
+
+
 }
