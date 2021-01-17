@@ -14,10 +14,13 @@ tokenlist *new_tokenlist(void);
 void add_token(tokenlist *tokens, char *item);
 void free_tokens(tokenlist *tokens);
 
+bool tokenCheck(tokenlist *token); /* checks if valid command using getenv*/
+
 int main()
 {
 	while (1) {
 		printf("> ");
+
 
 		/* input contains the whole command
 		 * tokens contains substrings from input split by spaces
@@ -110,4 +113,11 @@ void free_tokens(tokenlist *tokens)
 		free(tokens->items[i]);
 
 	free(tokens);
+}
+
+bool tokenCheck(tokenlist *token){
+	char *check = getenv(token);
+	if(check != NULL)
+		return true;
+	return false;
 }
