@@ -14,7 +14,7 @@ tokenlist *new_tokenlist(void);
 void add_token(tokenlist *tokens, char *item);
 void free_tokens(tokenlist *tokens);
 
-void environmentVariables(tokenlist *tokens);
+bool tokenCheck(tokenlist *token); /* checks if valid command using getenv*/
 
 int main()
 {
@@ -114,7 +114,10 @@ void free_tokens(tokenlist *tokens)
 
 	free(tokens);
 }
-void environmentVariables(tokenlist *tokens)
-{
-	char *env 
+
+bool tokenCheck(tokenlist *token){
+	char *check = getenv(token);
+	if(check != NULL)
+		return true;
+	return false;
 }
