@@ -18,12 +18,13 @@ void free_tokens(tokenlist *tokens);
 bool tokenCheck(char *token);
 bool dollarSignCheck(char *token);
 char *searchDollar(char *token);
-void returnenv(char *token);
+char* returnenv(char *token);
+void prompt ();
 
 int main()
 {
 	while (1) {
-		printf("> ");
+		prompt();
 
 		/* input contains the whole command
 		 * tokens contains substrings from input split by spaces
@@ -39,8 +40,8 @@ int main()
 			printf("token %d: (%s)\n", i, tokens->items[i]);
 
 			char *newToken = tokens->items[i];
-			returnenv(newToken);
-			
+			char* example = returnenv(newToken);
+			printf("%s\n", example );
 
 			
 		}
@@ -151,13 +152,30 @@ char *searchDollar(char* token){
 	return substr;
 }
 
-void returnenv(char * token){
+char * returnenv(char * token){
+	char* hasDollar;
 	if(dollarSignCheck(token) == true){
-				char* hasDollar=searchDollar(token);
+				hasDollar=searchDollar(token);
 				if(tokenCheck(hasDollar) == true){
 					hasDollar = getenv(hasDollar);
-					printf("%s\n", hasDollar );
+					//printf("%s\n", hasDollar );
+					return hasDollar;
 				}
 			}
-			
+			return hasDollar;
+}
+
+void prompt() // for part 3 of the project
+{
+    //my plan as of now is to wait til we have the env variables from part 1 set up and then just call the variable names instead of the hardcoded stuff i have now 
+    //also this might not end up being a void function
+
+     printf(getenv("USER"));
+     printf("@");
+     printf(getenv("MACHINE"));
+     printf(":");
+     printf(getenv("PWD"));
+     printf(">\n");
+
+
 }
