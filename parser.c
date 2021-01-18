@@ -153,7 +153,7 @@ char *searchDollar(char* token){
 }
 
 char * returnenv(char * token){
-	char* hasDollar;
+	char* hasDollar = token;
 	if(dollarSignCheck(token) == true){
 				hasDollar=searchDollar(token);
 				if(tokenCheck(hasDollar) == true){
