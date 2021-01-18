@@ -18,6 +18,7 @@ void free_tokens(tokenlist *tokens);
 bool tokenCheck(char *token);
 bool dollarSignCheck(char *token);
 char *searchDollar(char *token);
+void returnenv(char *token);
 
 int main()
 {
@@ -38,26 +39,12 @@ int main()
 			printf("token %d: (%s)\n", i, tokens->items[i]);
 
 			char *newToken = tokens->items[i];
-			if(dollarSignCheck(newToken) == true){
-				char* hasDollar=searchDollar(newToken);
-				if(tokenCheck(hasDollar) == true){
-					hasDollar = getenv(hasDollar);
-					printf("%s\n", hasDollar );
-				}
-			}
+			returnenv(newToken);
+			
 
-			//dollarCheck=searchDollar(newToken);
-		/*	if(tokenCheck(dollarCheck) == true){
-				command = getenv(dollarCheck);
-				printf("%s main\n", command);
-			} */
-
+			
 		}
-	//	printf("hi\n");
-	//	printf("%s\n", tokens->items[0]);
-	//		printf("%s\n", tokens->items[1]);
-	//		printf("done\n");
-
+	
 		free(input);
 		free_tokens(tokens);
 	}
@@ -162,4 +149,15 @@ char *searchDollar(char* token){
 		}
 	}
 	return substr;
+}
+
+void returnenv(char * token){
+	if(dollarSignCheck(token) == true){
+				char* hasDollar=searchDollar(token);
+				if(tokenCheck(hasDollar) == true){
+					hasDollar = getenv(hasDollar);
+					printf("%s\n", hasDollar );
+				}
+			}
+			
 }
