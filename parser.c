@@ -21,6 +21,10 @@ char *searchDollar(char *token);
 char* returnenv(char *token);
 void prompt ();
 
+bool hasTilde(char *token);
+void tildeExpansion(char *token);
+void externalCommmand();
+
 int main()
 {
 	while (1) {
@@ -39,13 +43,17 @@ int main()
 		for (int i = 0; i < tokens->size; i++) {
 			printf("token %d: (%s)\n", i, tokens->items[i]);
 
-			char *newToken = tokens->items[i];
+			char *newToken = tokens->items[i]; // grabs individual words from sentence
 			char* example = returnenv(newToken);
+			if(hasTilde(newToken) == true){
+				tildeExpansion(newToken);
+			}
+
 			printf("%s\n", example );
 
-			
+
 		}
-	
+
 		free(input);
 		free_tokens(tokens);
 	}
@@ -167,7 +175,7 @@ char * returnenv(char * token){
 
 void prompt() // for part 3 of the project
 {
-    //my plan as of now is to wait til we have the env variables from part 1 set up and then just call the variable names instead of the hardcoded stuff i have now 
+    //my plan as of now is to wait til we have the env variables from part 1 set up and then just call the variable names instead of the hardcoded stuff i have now
     //also this might not end up being a void function
 
      printf(getenv("USER"));
@@ -177,5 +185,36 @@ void prompt() // for part 3 of the project
      printf(getenv("PWD"));
      printf(">\n");
 
+
+}
+bool hasTilde(char *token){ /*first checks to see if there is a tilde */
+	if(token[0] == '~')
+		return true;
+	return false;
+}
+
+void tildeExpansion(char *token){
+	printf(getenv("HOME"));
+		char *ntoken;
+		if(token[0] == '~'){
+			ntoken = token+1;
+		}
+
+	printf(ntoken);
+	printf("\n");
+
+}
+void externalCommmand()
+{
+	int pid = fork();
+	if(pid == 0){
+		printf("I am a child\n");
+		execv(getenv("PATH", x); //taken from recitation, needs correction
+	}
+	else
+	{
+		printf("I am a parent\n");
+		waitpid(pid, NULL, 0);
+	}
 
 }
