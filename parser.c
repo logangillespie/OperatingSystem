@@ -410,15 +410,20 @@ void tildeExpansion(char *token){
 }
 void externalCommmand()
 {
+	char * excuteFile;
 	int pid= fork();
-	if(pid =0)
+	if(pid ==0)
 	{
+		 printf("I am a child\n");
+		// execv(getenv("PATH"), excuteFile);
 		//use execv() command
 	}
 	else{
+		 printf("I am a parent\n");
 		//in parent(main)
 	}
 
 }
+
 
 
