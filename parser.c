@@ -19,6 +19,9 @@ bool tokenCheck(char *token);
 bool dollarSignCheck(char *token);
 char *searchDollar(char *token);
 
+bool hasTilde(char *token);
+void tildeExpansion(char *token);
+
 int main()
 {
 	while (1) {
@@ -37,6 +40,7 @@ int main()
 		for (int i = 0; i < tokens->size; i++) {
 			printf("token %d: (%s)\n", i, tokens->items[i]);
 
+<<<<<<< Updated upstream
 			char *newToken = tokens->items[i];
 			if(dollarSignCheck(newToken) == true){
 				char* hasDollar=searchDollar(newToken);
@@ -57,6 +61,18 @@ int main()
 	//	printf("%s\n", tokens->items[0]);
 	//		printf("%s\n", tokens->items[1]);
 	//		printf("done\n");
+=======
+			char *newToken = tokens->items[i]; // grabs individual words from sentence
+			char* example = returnenv(newToken);
+			if(hasTilde(newToken) == true){
+				tildeExpansion(newToken);
+			}
+
+			printf("%s\n", example );
+
+
+		}
+>>>>>>> Stashed changes
 
 		free(input);
 		free_tokens(tokens);
@@ -163,3 +179,60 @@ char *searchDollar(char* token){
 	}
 	return substr;
 }
+<<<<<<< Updated upstream
+=======
+
+char * returnenv(char * token){
+	char* hasDollar = token;
+	if(dollarSignCheck(token) == true){
+				hasDollar=searchDollar(token);
+				if(tokenCheck(hasDollar) == true){
+					hasDollar = getenv(hasDollar);
+					//printf("%s\n", hasDollar );
+					return hasDollar;
+				}
+			}
+			return hasDollar;
+}
+
+void prompt() // for part 3 of the project
+{
+    //my plan as of now is to wait til we have the env variables from part 1 set up and then just call the variable names instead of the hardcoded stuff i have now
+    //also this might not end up being a void function
+
+     printf(getenv("USER"));
+     printf("@");
+     printf(getenv("MACHINE"));
+     printf(":");
+     printf(getenv("PWD"));
+     printf(">\n");
+
+
+}
+bool hasTilde(char *token){ /*first checks to see if there is a tilde */
+	if(token[0] == '~')
+		return true;
+	return false;
+}
+
+void tildeExpansion(char *token){
+	char *temp = getenv("HOME");
+	size_t len = strlen(temp);
+	char *first, second;
+
+	for(int i = 0; i<len; i++){
+		if(temp[i] == '~')
+		{
+			//second =
+		}
+	}
+		//char * token2;
+	//	printf("/");
+	//	if(token[0] == '~')
+		//	token2 = token + 1;
+		if(token[0] == '/')
+			token = token + 1;
+	//printf(token2);
+
+}
+>>>>>>> Stashed changes
