@@ -18,6 +18,8 @@ void free_tokens(tokenlist *tokens);
 bool tokenCheck(char *token);
 bool dollarSignCheck(char *token);
 char *searchDollar(char *token);
+char* returnenv(char *token);
+void prompt ();
 
 bool hasTilde(char *token);
 void tildeExpansion(char *token);
@@ -25,7 +27,7 @@ void tildeExpansion(char *token);
 int main()
 {
 	while (1) {
-		printf("> ");
+		prompt();
 
 		/* input contains the whole command
 		 * tokens contains substrings from input split by spaces
@@ -40,28 +42,6 @@ int main()
 		for (int i = 0; i < tokens->size; i++) {
 			printf("token %d: (%s)\n", i, tokens->items[i]);
 
-<<<<<<< Updated upstream
-			char *newToken = tokens->items[i];
-			if(dollarSignCheck(newToken) == true){
-				char* hasDollar=searchDollar(newToken);
-				if(tokenCheck(hasDollar) == true){
-					hasDollar = getenv(hasDollar);
-					printf("%s\n", hasDollar );
-				}
-			}
-
-			//dollarCheck=searchDollar(newToken);
-		/*	if(tokenCheck(dollarCheck) == true){
-				command = getenv(dollarCheck);
-				printf("%s main\n", command);
-			} */
-
-		}
-	//	printf("hi\n");
-	//	printf("%s\n", tokens->items[0]);
-	//		printf("%s\n", tokens->items[1]);
-	//		printf("done\n");
-=======
 			char *newToken = tokens->items[i]; // grabs individual words from sentence
 			char* example = returnenv(newToken);
 			if(hasTilde(newToken) == true){
@@ -72,7 +52,6 @@ int main()
 
 
 		}
->>>>>>> Stashed changes
 
 		free(input);
 		free_tokens(tokens);
@@ -179,8 +158,6 @@ char *searchDollar(char* token){
 	}
 	return substr;
 }
-<<<<<<< Updated upstream
-=======
 
 char * returnenv(char * token){
 	char* hasDollar = token;
@@ -216,23 +193,13 @@ bool hasTilde(char *token){ /*first checks to see if there is a tilde */
 }
 
 void tildeExpansion(char *token){
-	char *temp = getenv("HOME");
-	size_t len = strlen(temp);
-	char *first, second;
-
-	for(int i = 0; i<len; i++){
-		if(temp[i] == '~')
-		{
-			//second =
+	printf(getenv("HOME"));
+		char *ntoken;
+		if(token[0] == '~'){
+			ntoken = token+1;
 		}
-	}
-		//char * token2;
-	//	printf("/");
-	//	if(token[0] == '~')
-		//	token2 = token + 1;
-		if(token[0] == '/')
-			token = token + 1;
-	//printf(token2);
+
+	printf(ntoken);
+	printf("\n");
 
 }
->>>>>>> Stashed changes
