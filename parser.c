@@ -23,6 +23,7 @@ void prompt ();
 
 bool hasTilde(char *token);
 void tildeExpansion(char *token);
+void externalCommmand();
 
 int main()
 {
@@ -201,5 +202,10 @@ void tildeExpansion(char *token){
 
 	printf(ntoken);
 	printf("\n");
+
+}
+void externalCommmand()
+{
+
 
 }
