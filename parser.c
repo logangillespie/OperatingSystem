@@ -140,15 +140,29 @@ void prompt() // for part 3 of the project
 
 
 }
+void tildeExpansion(char *token){
+	printf(getenv("HOME"));
+		char *ntoken;
+		if(token[0] == '~'){
+			ntoken = token+1;
+		}
 
-
-void tilde_expansion()
-{
-	
-	if('~'){
-		printf("The $HOME env\n");
-
-	}
-
+	printf(ntoken);
+	printf("\n");
 
 }
+void externalCommmand()
+{
+	int pid= fork();
+	if(pid =0)
+	{
+		//use execv() command
+	}
+	else{
+		//in parent(main)
+	}
+
+}
+
+
+
