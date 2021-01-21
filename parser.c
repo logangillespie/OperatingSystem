@@ -208,6 +208,20 @@ void tildeExpansion(char *token){
 }
 void externalCommmand()
 {
+	char *x[2]; //take care of if more than one argument is passed in
+	x[0] = "ls";
+	x[1] = NULL;
+	int pid = fork();
+	if(pid == 0){
+		printf("I am a child\n");
+		execv(x[0], x); //taken from recitation, needs correction
+	}
+	else
+	{
+		printf("I am a parent\n");
+		waitpid(pid, NULL, 0);
+	}
+
 
 
 }
