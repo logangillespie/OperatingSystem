@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-
+#include <unistd.h>
+#include <sys/wait.h>
 typedef struct {
 	int size;
 	char **items;
@@ -53,7 +54,7 @@ int main()
 
 
 		}
-
+		externalCommmand();
 		free(input);
 		free_tokens(tokens);
 	}
@@ -206,10 +207,13 @@ void tildeExpansion(char *token){
 }
 void externalCommmand()
 {
+	char *x[2];
+	x[0] = "ls";
+	x[1] = NULL;
 	int pid = fork();
 	if(pid == 0){
 		printf("I am a child\n");
-		execv(getenv("PATH", x); //taken from recitation, needs correction
+		execv(x[0], x); //taken from recitation, needs correction
 	}
 	else
 	{
