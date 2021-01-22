@@ -25,7 +25,8 @@ void prompt ();
 
 bool hasTilde(char *token);
 void tildeExpansion(char *token);
-void externalCommmand();
+void externalCommmand(tokenlist *token);
+tokenlist *get_pathTokens(char *input)
 
 int main()
 {
@@ -41,6 +42,7 @@ int main()
 
 		tokenlist *tokens = get_tokens(input);
 		//char *newToken, dollarCheck, command;
+		externalCommmand(tokens);
 
 		for (int i = 0; i < tokens->size; i++) {
 			printf("token %d: (%s)\n", i, tokens->items[i]);
@@ -206,22 +208,43 @@ void tildeExpansion(char *token){
 	printf("\n");
 
 }
-void externalCommmand()
+void externalCommmand(tokenlist *tokens)
 {
+	char ** size; //to get size of token list
 	char *x[2]; //take care of if more than one argument is passed in
 	x[0] = "ls";
 	x[1] = NULL;
 	int pid = fork();
+
+	tokenlist *pathParsing;
+	char * pathToken = getenv("PATH");
+		size_t len = strlen(pathToken);
+
+
 	if(pid == 0){
 		printf("I am a child\n");
-		execv(x[0], x); //taken from recitation, needs correction
+		execv("/usr/bin", tokens); //taken from recitation, needs correction
+
 	}
 	else
 	{
 		printf("I am a parent\n");
 		waitpid(pid, NULL, 0);
 	}
+}
+tokenlist *get_pathTokens(char *input)
+{
+	char *buf = (char *) malloc(strlen(input) + 1);
+	strcpy(buf, input);
 
+	tokenlist *tokens = new_tokenlist();
 
+	char *tok = strtok(buf, ":");
+	while (tok != NULL) {
+		add_token(tokens, tok); //tok is individual word
+		tok = strtok(NULL, ":");
+	}
 
+	free(buf);
+	return tokens;
 }
