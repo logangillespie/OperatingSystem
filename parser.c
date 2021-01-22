@@ -11,6 +11,7 @@ typedef struct {
 
 char *get_input(void);
 tokenlist *get_tokens(char *input);
+tokenlist *get_paths(char *input);
 
 tokenlist *new_tokenlist(void);
 void add_token(tokenlist *tokens, char *item);
@@ -24,26 +25,31 @@ void prompt ();
 
 bool hasTilde(char *token);
 void tildeExpansion(char *token);
-void externalCommmand();
+void externalCommmand(tokenlist * tokenpath, tokenlist * tokens);
 
 int main()
 {
+
 	while (1) {
 		prompt();
 
 		/* input contains the whole command
 		 * tokens contains substrings from input split by spaces
 		 */
-
+		tokenlist *tokenpath = get_paths(getenv("PATH"));
+		// for(int i = 0; i < tokenpath->size; i++){
+		// 	printf("tokenpath %d: (%s)\n", i, tokenpath->items[i]);
+		//}
 		char *input = get_input();
 		printf("whole input: %s\n", input);
 
 		tokenlist *tokens = get_tokens(input);
 		//char *newToken, dollarCheck, command;
-
+		//makeArray(tokens);
+		externalCommmand(tokenpath, tokens);
 		for (int i = 0; i < tokens->size; i++) {
+			//printf("token %d: (%s)\n", i, tokens->items[i]);
 			printf("token %d: (%s)\n", i, tokens->items[i]);
-
 			char *newToken = tokens->items[i]; // grabs individual words from sentence
 			char* example = returnenv(newToken);
 			if(hasTilde(newToken) == true){
@@ -54,7 +60,6 @@ int main()
 
 
 		}
-		externalCommmand();
 		free(input);
 		free_tokens(tokens);
 	}
@@ -122,6 +127,24 @@ tokenlist *get_tokens(char *input)
 	while (tok != NULL) {
 		add_token(tokens, tok); //tok is individual word
 		tok = strtok(NULL, " ");
+	}
+	add_token(tokens, "\0");
+	printf("size is: (%d)", tokens->size);
+	free(buf);
+	return tokens;
+}
+
+tokenlist *get_paths(char *input)
+{
+	char *buf = (char *) malloc(strlen(input) + 1);
+	strcpy(buf, input);
+
+	tokenlist *tokens = new_tokenlist();
+
+	char *tok = strtok(buf, ":");
+	while (tok != NULL) {
+		add_token(tokens, tok); //tok is individual word
+		tok = strtok(NULL, ":");
 	}
 
 	free(buf);
@@ -205,15 +228,18 @@ void tildeExpansion(char *token){
 	printf("\n");
 
 }
-void externalCommmand()
+void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 {
 	char *x[2];
 	x[0] = "ls";
-	x[1] = NULL;
+	x[1] = "-al";
+	x[2] = NULL;
 	int pid = fork();
 	if(pid == 0){
 		printf("I am a child\n");
-		execv(x[0], x); //taken from recitation, needs correction
+		for(int i = 0; i < 10; i++)
+		execv(tokenpath->items[i], x); //taken from recitation, needs correction
+		printf("it didnt work\n");
 	}
 	else
 	{
@@ -222,3 +248,13 @@ void externalCommmand()
 	}
 
 }
+
+
+
+
+
+
+
+
+
+
