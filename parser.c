@@ -229,7 +229,7 @@ void tildeExpansion(char *token){
 }
 void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 {
-	tokenlist * command;
+
 	for(int i = 0; i < 10; i++){
 		int length = strlen(tokens->items[0]);
 		strncat(tokenpath->items[i], "/", 1);
@@ -237,13 +237,15 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 		//printf("%s\n", tokenpath->items[i]);
 	}
 	int size = tokens->size;
-	//printf("The size is: %d\n", size);
+	printf("The size is: %d\n", size);
+	if(size == 2)
+		size = 3;
 	char * x[size];
 	int fd = -1, i = 0;
 	while(fd == -1){
 	fd = access(tokenpath->items[i], F_OK);
 	if(fd == -1)
-		printf("%s\n", "error");
+		printf("%s\n", "command not found");
 	else
 		x[0] = tokenpath->items[i];
 		//printf("%s\n", "found");
