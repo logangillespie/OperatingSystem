@@ -42,11 +42,10 @@ int main()
 		//}
 		char *input = get_input();
 		printf("whole input: %s\n", input);
-
 		tokenlist *tokens = get_tokens(input);
+		externalCommmand(tokenpath, tokens);
 		//char *newToken, dollarCheck, command;
 		//makeArray(tokens);
-		externalCommmand(tokenpath, tokens);
 		for (int i = 0; i < tokens->size; i++) {
 			//printf("token %d: (%s)\n", i, tokens->items[i]);
 			printf("token %d: (%s)\n", i, tokens->items[i]);
@@ -129,7 +128,7 @@ tokenlist *get_tokens(char *input)
 		tok = strtok(NULL, " ");
 	}
 	add_token(tokens, "\0");
-	printf("size is: (%d)", tokens->size);
+	//printf("size is: (%d)", tokens->size);
 	free(buf);
 	return tokens;
 }
@@ -230,15 +229,38 @@ void tildeExpansion(char *token){
 }
 void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 {
-	char *x[2];
-	x[0] = "ls";
-	x[1] = "-al";
-	x[2] = NULL;
+	tokenlist * command;
+	for(int i = 0; i < 10; i++){
+		int length = strlen(tokens->items[0]);
+		strncat(tokenpath->items[i], "/", 1);
+		strncat(tokenpath->items[i], tokens->items[0], length);
+		//printf("%s\n", tokenpath->items[i]);
+	}
+	int size = tokens->size;
+	//printf("The size is: %d\n", size);
+	char * x[size];
+	int fd = -1, i = 0;
+	while(fd == -1){
+	fd = access(tokenpath->items[i], F_OK);
+	if(fd == -1)
+		printf("%s\n", "error");
+	else
+		x[0] = tokenpath->items[i];
+		//printf("%s\n", "found");
+	i++;
+}
+	for(int i = 1; i < size; i++){
+		x[i] = tokens->items[i];
+	}
+	x[size-1] = NULL;
+	for(int i = 0; i < 2; i++)
+		printf("%s\n", x[i]);
 	int pid = fork();
 	if(pid == 0){
 		printf("I am a child\n");
-		for(int i = 0; i < 10; i++)
-		execv(tokenpath->items[i], x); //taken from recitation, needs correction
+		execv(x[0], x);
+	
+		 //taken from recitation, needs correction
 		printf("it didnt work\n");
 	}
 	else
