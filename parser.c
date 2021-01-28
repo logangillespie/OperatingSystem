@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <sys/wait.h>
-
 typedef struct {
 	int size;
 	char **items;
@@ -12,6 +11,7 @@ typedef struct {
 
 char *get_input(void);
 tokenlist *get_tokens(char *input);
+tokenlist *get_paths(char *input);
 
 tokenlist *new_tokenlist(void);
 void add_token(tokenlist *tokens, char *item);
@@ -25,28 +25,30 @@ void prompt ();
 
 bool hasTilde(char *token);
 void tildeExpansion(char *token);
-void externalCommmand(tokenlist *token);
-tokenlist *get_pathTokens(char *input)
+void externalCommmand(tokenlist * tokenpath, tokenlist * tokens);
 
 int main()
 {
+
 	while (1) {
 		prompt();
 
 		/* input contains the whole command
 		 * tokens contains substrings from input split by spaces
 		 */
-
+		tokenlist *tokenpath = get_paths(getenv("PATH"));
+		// for(int i = 0; i < tokenpath->size; i++){
+		// 	printf("tokenpath %d: (%s)\n", i, tokenpath->items[i]);
+		//}
 		char *input = get_input();
 		printf("whole input: %s\n", input);
-
 		tokenlist *tokens = get_tokens(input);
+		externalCommmand(tokenpath, tokens);
 		//char *newToken, dollarCheck, command;
-		externalCommmand(tokens);
-
+		//makeArray(tokens);
 		for (int i = 0; i < tokens->size; i++) {
+			//printf("token %d: (%s)\n", i, tokens->items[i]);
 			printf("token %d: (%s)\n", i, tokens->items[i]);
-
 			char *newToken = tokens->items[i]; // grabs individual words from sentence
 			char* example = returnenv(newToken);
 			if(hasTilde(newToken) == true){
@@ -57,7 +59,6 @@ int main()
 
 
 		}
-
 		free(input);
 		free_tokens(tokens);
 	}
@@ -125,6 +126,24 @@ tokenlist *get_tokens(char *input)
 	while (tok != NULL) {
 		add_token(tokens, tok); //tok is individual word
 		tok = strtok(NULL, " ");
+	}
+	add_token(tokens, "\0");
+	//printf("size is: (%d)", tokens->size);
+	free(buf);
+	return tokens;
+}
+
+tokenlist *get_paths(char *input)
+{
+	char *buf = (char *) malloc(strlen(input) + 1);
+	strcpy(buf, input);
+
+	tokenlist *tokens = new_tokenlist();
+
+	char *tok = strtok(buf, ":");
+	while (tok != NULL) {
+		add_token(tokens, tok); //tok is individual word
+		tok = strtok(NULL, ":");
 	}
 
 	free(buf);
@@ -208,43 +227,46 @@ void tildeExpansion(char *token){
 	printf("\n");
 
 }
-void externalCommmand(tokenlist *tokens)
+void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 {
-	char ** size; //to get size of token list
-	char *x[2]; //take care of if more than one argument is passed in
-	x[0] = "ls";
-	x[1] = NULL;
+	tokenlist * command;
+	for(int i = 0; i < 10; i++){
+		int length = strlen(tokens->items[0]);
+		strncat(tokenpath->items[i], "/", 1);
+		strncat(tokenpath->items[i], tokens->items[0], length);
+		//printf("%s\n", tokenpath->items[i]);
+	}
+	int size = tokens->size;
+	//printf("The size is: %d\n", size);
+	char * x[size];
+	int fd = -1, i = 0;
+	while(fd == -1){
+	fd = access(tokenpath->items[i], F_OK);
+	if(fd == -1)
+		printf("%s\n", "error");
+	else
+		x[0] = tokenpath->items[i];
+		//printf("%s\n", "found");
+	i++;
+}
+	for(int i = 1; i < size; i++){
+		x[i] = tokens->items[i];
+	}
+	x[size-1] = NULL;
+	for(int i = 0; i < 2; i++)
+		printf("%s\n", x[i]);
 	int pid = fork();
-
-	tokenlist *pathParsing;
-	char * pathToken = getenv("PATH");
-		size_t len = strlen(pathToken);
-
-
 	if(pid == 0){
 		printf("I am a child\n");
-		execv("/usr/bin", tokens); //taken from recitation, needs correction
+		execv(x[0], x);
 
+		 //taken from recitation, needs correction
+		printf("it didnt work\n");
 	}
 	else
 	{
 		printf("I am a parent\n");
 		waitpid(pid, NULL, 0);
 	}
-}
-tokenlist *get_pathTokens(char *input)
-{
-	char *buf = (char *) malloc(strlen(input) + 1);
-	strcpy(buf, input);
 
-	tokenlist *tokens = new_tokenlist();
-
-	char *tok = strtok(buf, ":");
-	while (tok != NULL) {
-		add_token(tokens, tok); //tok is individual word
-		tok = strtok(NULL, ":");
-	}
-
-	free(buf);
-	return tokens;
 }
