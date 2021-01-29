@@ -237,26 +237,35 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 		//printf("%s\n", tokenpath->items[i]);
 	}
 	int size = tokens->size;
-	printf("The size is: %d\n", size);
-	if(size == 2)
-		size = 3;
+	printf("the size is: ");
+	printf("%d\n", tokens->size );
+	int fd;
 	char * x[size];
-	int fd = -1, i = 0;
-	while(fd == -1){
+	for(int i = 0; i < 10; i++){
 	fd = access(tokenpath->items[i], F_OK);
 	if(fd == -1)
-		printf("%s\n", "command not found");
-	else
+		;
+	else if(fd == 0){
+		//printf("fd: %d\n", fd);
 		x[0] = tokenpath->items[i];
+		break;
+	}
 		//printf("%s\n", "found");
-	i++;
 }
+	if(fd == -1)
+		printf("%s\n", "command not found");
+	else{
+		if(size >= 2){
 	for(int i = 1; i < size; i++){
 		x[i] = tokens->items[i];
+		printf("tokens->items: %s\n", x[i]);
 	}
-	x[size-1] = NULL;
-	for(int i = 0; i < 2; i++)
-		printf("%s\n", x[i]);
+}
+	printf("the size is: ");
+	printf("%d\n", size );
+	 x[size-1] = NULL;
+	for(int i = 0; i < size; i++)
+		printf("hehe: %s\n", x[i]);
 	int pid = fork();
 	if(pid == 0){
 		printf("I am a child\n");
@@ -270,6 +279,7 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 		printf("I am a parent\n");
 		waitpid(pid, NULL, 0);
 	}
+}
 
 }
 
