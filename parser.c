@@ -26,6 +26,8 @@ void prompt ();
 bool hasTilde(char *token);
 void tildeExpansion(char *token);
 void externalCommmand(tokenlist * tokenpath, tokenlist * tokens);
+void redirection(tokenlist *tokenpath);
+bool hasRedirection(char *token);
 
 int main()
 {
@@ -53,6 +55,9 @@ int main()
 			char* example = returnenv(newToken);
 			if(hasTilde(newToken) == true){
 				tildeExpansion(newToken);
+			}
+			if(hasRedirection(newToken) == true){
+				redirection(tokens);
 			}
 
 			printf("%s\n", example );
@@ -229,7 +234,7 @@ void tildeExpansion(char *token){
 }
 void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 {
-	tokenlist * command;
+	//tokenlist * command;
 	for(int i = 0; i < 10; i++){
 		int length = strlen(tokens->items[0]);
 		strncat(tokenpath->items[i], "/", 1);
@@ -269,4 +274,14 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 		waitpid(pid, NULL, 0);
 	}
 
+}
+void redirection(tokenlist *tokenpath)
+{
+	char * inputFile, outputFile;
+	printf("%s\n", "in redirection functions" );
+}
+bool hasRedirection(char *token){
+	if(token == '<' || token == '>')
+		return true;
+	return false;
 }
