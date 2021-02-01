@@ -54,7 +54,6 @@ int main()
 			if(hasTilde(newToken) == true){
 				tildeExpansion(newToken);
 			}
-			
 
 			printf("%s\n", example );
 
@@ -240,33 +239,7 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 		printf("the size is: ");
 		printf("%d\n", tokens->size );
 
-		char * input;
-		char *output;
-		for(int i = 0; i<size; i++){
-			if(*tokens->items[i] == '<' || *tokens->items[i] == '>') //checks if there
-				printf("%s\n", "found < >" ); {												//arrow in command
-					if(*tokens->items[i] == '>'){
-						input = tokens->items[0]; //first file
-						printf("%s input file\n", input);
-						output = tokens-> items[2];
-						printf("%s output file\n", output);
 
-						int fd1 = open(output,O_WRONLY | O_APPEND | O_CREAT, 0644);
-						int sizeOutput = output->;
-						if(write(fd1, output, sizeOutput))
-					//	close(1);
-						dup(fd1);
-						close(fd1);
-
-						char *x[2];
-						x[0]="ls";
-						x[1]=NULL;
-
-						execvp(x[0],x);
-
-					}
-				}
-		}
 		int fd;
 		char * x[size];
 		for(int i = 0; i < 10; i++){
@@ -296,10 +269,37 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 		 x[size-1] = NULL;
 		for(int i = 0; i < size; i++)
 			printf("hehe: %s\n", x[i]);
+
+//file redirection stuff
+char *command;
+char * input;
+char *output;
+for(int i = 0; i<size; i++){
+	if(*tokens->items[i] == '<' || *tokens->items[i] == '>') //checks if there
+		printf("%s\n", "found <, >" ); {												//arrow in command
+			if(*tokens->items[i] == '>'){ // echo hello > input.txt //puts hello in input.txt
+				command = tokens->items[0]; //command
+				printf("%s command\n", command);
+
+
+				input = tokens->items[1]
+				output = tokens-> items[3];
+				printf("%s output file\n", output);
+			}
+		}
+}
+
+		int fd1 = open(output,O_RDWR | O_APPEND | O_CREAT, 0777);
 		int pid = fork();
 		if(pid == 0){
 			printf("I am a child\n");
-			execv(x[0], x);
+									//print to file
+					close(0); //0 is standard in, 1 is standard out
+					dup(fd1);
+					close(0);
+					//execv(x[0], x);
+			if(execv(x[0], x) == -1);
+				printf("%s\n", "command not found");
 
 			 //taken from recitation, needs correction
 			printf("it didnt work\n");
