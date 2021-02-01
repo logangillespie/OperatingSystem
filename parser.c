@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 typedef struct {
 	int size;
 	char **items;
@@ -26,6 +27,7 @@ void prompt ();
 bool hasTilde(char *token);
 void tildeExpansion(char *token);
 void externalCommmand(tokenlist * tokenpath, tokenlist * tokens);
+
 
 int main()
 {
@@ -54,6 +56,7 @@ int main()
 			if(hasTilde(newToken) == true){
 				tildeExpansion(newToken);
 			}
+
 
 			printf("%s\n", example );
 
@@ -254,7 +257,6 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 			//printf("%s\n", "found");
 	}
 
-
 		if(fd == -1)
 			printf("%s\n", "command not found");
 		else{
@@ -269,11 +271,13 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 		 x[size-1] = NULL;
 		for(int i = 0; i < size; i++)
 			printf("hehe: %s\n", x[i]);
-
 //file redirection stuff
 char *command;
 char * input;
 char *output;
+tokenlist* tokens2 = tokens;
+int size = tokens2->size;
+
 for(int i = 0; i<size; i++){
 	if(*tokens->items[i] == '<' || *tokens->items[i] == '>') //checks if there
 		printf("%s\n", "found <, >" ); {												//arrow in command
@@ -281,34 +285,34 @@ for(int i = 0; i<size; i++){
 				command = tokens->items[0]; //command
 				printf("%s command\n", command);
 
-
-				input = tokens->items[1]
+				char delim = '>';
+				input = tokens->items[1];
 				output = tokens-> items[3];
 				printf("%s output file\n", output);
 			}
 		}
 }
 
-		int fd1 = open(output,O_RDWR | O_APPEND | O_CREAT, 0777);
-		int pid = fork();
-		if(pid == 0){
-			printf("I am a child\n");
-									//print to file
-					close(0); //0 is standard in, 1 is standard out
-					dup(fd1);
-					close(0);
-					//execv(x[0], x);
-			if(execv(x[0], x) == -1);
-				printf("%s\n", "command not found");
 
-			 //taken from recitation, needs correction
-			printf("it didnt work\n");
-		}
-		else
-		{
-			printf("I am a parent\n");
-			waitpid(pid, NULL, 0);
-		}
-	}
+			int fd1 = open(output,O_RDWR | O_APPEND | O_CREAT, 0777);
+			int pid = fork();
+			if(pid == 0){
+				printf("I am a child\n");
+										//print to file
+						close(0); //0 is standard in, 1 is standard out
+						dup(fd1);
+						close(0);
+						//execv(x[0], x);
+				if(execv(x[0], x) == -1);
+					printf("%s\n", "command not found");
 
+				 //taken from recitation, needs correction
+				printf("it didnt work\n");
+			}
+			else
+			{
+				printf("I am a parent\n");
+				waitpid(pid, NULL, 0);
+			}
+		}
 }
