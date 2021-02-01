@@ -26,8 +26,6 @@ void prompt ();
 bool hasTilde(char *token);
 void tildeExpansion(char *token);
 void externalCommmand(tokenlist * tokenpath, tokenlist * tokens);
-void redirection(tokenlist *tokenpath);
-bool hasRedirection(char *token);
 
 int main()
 {
@@ -56,9 +54,7 @@ int main()
 			if(hasTilde(newToken) == true){
 				tildeExpansion(newToken);
 			}
-			if(hasRedirection(newToken) == true){
-				redirection(tokens);
-			}
+			
 
 			printf("%s\n", example );
 
@@ -234,54 +230,85 @@ void tildeExpansion(char *token){
 }
 void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 {
-	//tokenlist * command;
 	for(int i = 0; i < 10; i++){
-		int length = strlen(tokens->items[0]);
-		strncat(tokenpath->items[i], "/", 1);
-		strncat(tokenpath->items[i], tokens->items[0], length);
-		//printf("%s\n", tokenpath->items[i]);
-	}
-	int size = tokens->size;
-	//printf("The size is: %d\n", size);
-	char * x[size];
-	int fd = -1, i = 0;
-	while(fd == -1){
-	fd = access(tokenpath->items[i], F_OK);
-	if(fd == -1)
-		printf("%s\n", "error");
-	else
-		x[0] = tokenpath->items[i];
-		//printf("%s\n", "found");
-	i++;
-}
-	for(int i = 1; i < size; i++){
-		x[i] = tokens->items[i];
-	}
-	x[size-1] = NULL;
-	for(int i = 0; i < 2; i++)
-		printf("%s\n", x[i]);
-	int pid = fork();
-	if(pid == 0){
-		printf("I am a child\n");
-		execv(x[0], x);
+			int length = strlen(tokens->items[0]);
+			strncat(tokenpath->items[i], "/", 1);
+			strncat(tokenpath->items[i], tokens->items[0], length);
+			//printf("%s\n", tokenpath->items[i]);
+		}
+		int size = tokens->size;
+		printf("the size is: ");
+		printf("%d\n", tokens->size );
 
-		 //taken from recitation, needs correction
-		printf("it didnt work\n");
-	}
-	else
-	{
-		printf("I am a parent\n");
-		waitpid(pid, NULL, 0);
+		char * input;
+		char *output;
+		for(int i = 0; i<size; i++){
+			if(*tokens->items[i] == '<' || *tokens->items[i] == '>') //checks if there
+				printf("%s\n", "found < >" ); {												//arrow in command
+					if(*tokens->items[i] == '>'){
+						input = tokens->items[0]; //first file
+						printf("%s input file\n", input);
+						output = tokens-> items[2];
+						printf("%s output file\n", output);
+
+						int fd1 = open(output,O_WRONLY | O_APPEND | O_CREAT, 0644);
+						int sizeOutput = output->;
+						if(write(fd1, output, sizeOutput))
+					//	close(1);
+						dup(fd1);
+						close(fd1);
+
+						char *x[2];
+						x[0]="ls";
+						x[1]=NULL;
+
+						execvp(x[0],x);
+
+					}
+				}
+		}
+		int fd;
+		char * x[size];
+		for(int i = 0; i < 10; i++){
+		fd = access(tokenpath->items[i], F_OK);
+		if(fd == -1)
+			;
+		else if(fd == 0){
+			//printf("fd: %d\n", fd);
+			x[0] = tokenpath->items[i];
+			break;
+		}
+			//printf("%s\n", "found");
 	}
 
-}
-void redirection(tokenlist *tokenpath)
-{
-	char * inputFile, outputFile;
-	printf("%s\n", "in redirection functions" );
-}
-bool hasRedirection(char *token){
-	if(token == '<' || token == '>')
-		return true;
-	return false;
+
+		if(fd == -1)
+			printf("%s\n", "command not found");
+		else{
+			if(size >= 2){
+		for(int i = 1; i < size; i++){
+			x[i] = tokens->items[i];
+			printf("tokens->items: %s\n", x[i]);
+		}
+	}
+		printf("the size is: ");
+		printf("%d\n", size );
+		 x[size-1] = NULL;
+		for(int i = 0; i < size; i++)
+			printf("hehe: %s\n", x[i]);
+		int pid = fork();
+		if(pid == 0){
+			printf("I am a child\n");
+			execv(x[0], x);
+
+			 //taken from recitation, needs correction
+			printf("it didnt work\n");
+		}
+		else
+		{
+			printf("I am a parent\n");
+			waitpid(pid, NULL, 0);
+		}
+	}
+
 }
