@@ -265,6 +265,25 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 				}
 		}
 
+		int inSpot, outSpot;
+
+		if(stIn == true && stOut == true){ // this is for cmd with both < and >
+			for(int i = 0; i<size; i++){
+				if(*tokens->items[i] == '<'){
+					input = tokens->items[i+1];
+					inSpot = i+1;
+				}
+
+				if(*tokens->items[i] == '>'){
+					output = tokens->items[i+1];
+					outSpot = i+1;
+				}
+		}
+	}
+	printf("this is the input %s\n", input);
+	printf("this is the output %s\n", output);
+	printf("this is the input spot %d\n", inSpot);
+	printf("this is the output spot %d\n", outSpot);
 
 		int fd;
 		char * x[size];
@@ -298,26 +317,7 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 //file redirection stuff
 char *x2[size];
 int fd1, fd2;
-// if(stOut == true) // make x only command
-// {
-// 	for(int i = 0; i<size;i++){
-// 		if(*x[i] == '-')
-// 			{
-// 				printf("%s\n", "found dash");
-// 				x2[0] = x[0];
-// 				x2[1] = x[1];
-// 				printf("%s\n", x2[1] );
-// 				x2[2] = '\0';
-// 				break;
-// 			}
-// 		else{
-// 			x2[0] = x[0];
-// 			printf("x2: %s\n", *x2);
-// 			x2[1] = '\0';
-// 		}
-// 	}
-// 	fd1 = open(output,O_RDWR| O_CREAT, 0777);
-// }
+
 bool dash = false;
 if(arrow == true) // make x only command
 {
@@ -342,20 +342,65 @@ if(arrow == true) // make x only command
 		}
 
 
-		printf("%s\n", "made it here 0" );
-		if(stOut == true)
+
+		// int inArrow, outArrow;
+		// if(stOut == true && stIn == true){
+		// 		printf("%s\n", "made it here both");
+		// 		for(int i = 0; i<size-1; i++){
+		// 			if(*x[i] == '<')
+		// 				inArrow = i;
+		// 			if(*x[i] == '>')
+		// 				outArrow == i;
+		// 		}
+		// 		if(inArrow > outArrow){ //see which arrow comes first then open
+		//
+		// 		}
+		// }
+		bool larger = false;
+			if(stOut == true && stIn == true){
+				printf("%s\n", "made it here both");
+				if(inSpot > outSpot){
+					fd2 = open(input, O_RDONLY, 0777);
+					fd1 = open(output,O_RDWR| O_CREAT, 0777);
+					larger = true;
+				}
+				else{
+					fd1 = open(output,O_RDWR| O_CREAT, 0777);
+					fd2 = open(input, O_RDONLY, 0777);
+				}
+			}
+		if(stOut == true && stIn == false){
 			fd1 = open(output,O_RDWR| O_CREAT, 0777);
-		if(stIn == true){
-			printf("%s\n", "made it here" );
+				printf("%s\n", "made it here std out only" );
+		}
+
+		if(stIn == true && stOut == false){
+
 			fd2 = open(input, O_RDONLY, 0777);
-			printf("%s\n", "made it here 2" );
+			printf("%s\n", "made it here std in only" );
 		}
 		//	int	fd1 = open(output,O_RDWR| O_CREAT, 0777);
 			int pid = fork();
 			if(pid == 0){
 				printf("I am a child\n");
 						//print to file
-				if(stOut == true){
+				if(stIn == true && stOut == true){// && larger == true){
+					close(0);
+					dup(fd2);
+					close(fd2);
+
+					close(1); //0 is standard in, 1 is standard out
+					dup(fd1);
+					close(fd1);
+
+					if(execv(x2[0], x2) == -1){
+					 printf("%s\n", "command not found");
+				 }
+				}
+				// else if(stIn == true && stOut == true && larger == false){
+				//
+				// }
+				else if(stOut == true){
 					close(1); //0 is standard in, 1 is standard out
 					dup(fd1);
 
