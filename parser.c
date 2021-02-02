@@ -243,7 +243,7 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 		printf("%d\n", tokens->size );
 
 
-		char *command, *input, *output;
+		char *input, *output;
 		bool arrow = false;
 		bool stOut = false;
 		bool stIn = false;
@@ -297,15 +297,60 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 
 //file redirection stuff
 char *x2[size];
-if(stOut == true) // make x only command
+int fd1, fd2;
+// if(stOut == true) // make x only command
+// {
+// 	for(int i = 0; i<size;i++){
+// 		if(*x[i] == '-')
+// 			{
+// 				printf("%s\n", "found dash");
+// 				x2[0] = x[0];
+// 				x2[1] = x[1];
+// 				printf("%s\n", x2[1] );
+// 				x2[2] = '\0';
+// 				break;
+// 			}
+// 		else{
+// 			x2[0] = x[0];
+// 			printf("x2: %s\n", *x2);
+// 			x2[1] = '\0';
+// 		}
+// 	}
+// 	fd1 = open(output,O_RDWR| O_CREAT, 0777);
+// }
+bool dash = false;
+if(arrow == true) // make x only command
 {
-	x2[0] = x[0];
-	printf("x2: %s\n", *x2);
-	x2[1] = '\0';
-}
+	for(int i = 0; i<size-1;i++){ // checks for commands like ls -al
+		if(*x[i] == '-')
+			{
+				printf("%s\n", "found dash");
+				dash = true;
+			}
+		}
+	}
+		if(dash == true){
+				x2[0] = x[0];
+				x2[1] = x[1];
+				printf("%s\n", x2[1] );
+				x2[2] = '\0';
+			}
+		else{
+			x2[0] = x[0];
+			printf("x2: %s\n", *x2);
+			x2[1] = '\0';
+		}
 
 
-			int	fd1 = open(output,O_RDWR| O_CREAT, 0777);
+		printf("%s\n", "made it here 0" );
+		if(stOut == true)
+			fd1 = open(output,O_RDWR| O_CREAT, 0777);
+		if(stIn == true){
+			printf("%s\n", "made it here" );
+			fd2 = open(input, O_RDONLY, 0777);
+			printf("%s\n", "made it here 2" );
+		}
+		//	int	fd1 = open(output,O_RDWR| O_CREAT, 0777);
 			int pid = fork();
 			if(pid == 0){
 				printf("I am a child\n");
@@ -323,8 +368,12 @@ if(stOut == true) // make x only command
 				 }
 		else if(stIn == true){
 					 close(0);
-					 dup(fd1);
-					 close(fd1);
+					 dup(fd2);
+					 close(fd2);
+
+					 if(execv(x2[0], x2) == -1){
+	 					printf("%s\n", "command not found");
+					}
 				 }
 
 				 else{
