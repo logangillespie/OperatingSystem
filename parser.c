@@ -243,6 +243,32 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 		printf("%d\n", tokens->size );
 
 
+		char *command, *output, *input1;
+		bool arrow = false;
+		bool stOut = false;
+		bool stIn = false;
+
+
+		for(int i = 0; i<size; i++){
+			if(*tokens->items[i] == '<' || *tokens->items[i] == '>'){ //checks if there
+				printf("%s\n", "found <, >" );
+				arrow = true;												//arrow in command
+					if(*tokens->items[i] == '>'){ // echo hello > input.txt //puts hello in input.txt
+						stOut = true;
+						command = tokens->items[0]; //command
+						printf("%s command\n", command);
+						output = tokens-> items[size-2];
+						//printf("output file: %s\n", output);
+					}
+					if(*tokens->items[i] == '<'){
+						stIn = true;
+						command = tokens -> items[0];
+						input1 = tokens->items[size-2];
+					}
+				}
+		}
+
+
 		int fd;
 		char * x[size];
 		for(int i = 0; i < 10; i++){
@@ -263,48 +289,59 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 			if(size >= 2){
 		for(int i = 1; i < size; i++){
 			x[i] = tokens->items[i];
-			printf("tokens->items: %s\n", x[i]);
+			//printf("tokens->items: %s\n", x[i]);
 		}
 	}
 		printf("the size is: ");
 		printf("%d\n", size );
 		 x[size-1] = NULL;
-		for(int i = 0; i < size; i++)
-			printf("hehe: %s\n", x[i]);
+		// for(int i = 0; i < size; i++)
+		// 	printf("hehe: %s\n", x[i]);
+
 //file redirection stuff
-char *command;
-char * input;
-char *output;
-tokenlist* tokens2 = tokens;
-int size = tokens2->size;
 
-for(int i = 0; i<size; i++){
-	if(*tokens->items[i] == '<' || *tokens->items[i] == '>') //checks if there
-		printf("%s\n", "found <, >" ); {												//arrow in command
-			if(*tokens->items[i] == '>'){ // echo hello > input.txt //puts hello in input.txt
-				command = tokens->items[0]; //command
-				printf("%s command\n", command);
+	char * input[size*size];
 
-				char delim = '>';
-				input = tokens->items[1];
-				output = tokens-> items[3];
-				printf("%s output file\n", output);
-			}
+if(arrow == true && stOut == true){
+	 //put if statement bc it will crash if there is no '>'
+		for(int i =1; i<size; i++){
+			if(*x[i] == '>')
+				break;
+			input[i] = x[i];
+			printf("%d", i );
+			printf(" %s ", input[i]);
 		}
-}
+		input[size-1] = '\0';
 
+	}
+//cat < lakes.txt
+// if(arrow == true && stIn == true){
+// 	for(int i =1; i<size; i++){
+// 		if(*x[i] == '<')
+// 			break;
+// 		input[i] = x[i];
+// 	}
+// }
 
-			int fd1 = open(output,O_RDWR | O_APPEND | O_CREAT, 0777);
+			int	fd1 = open(output,O_RDWR | O_CREAT, 0777);
 			int pid = fork();
 			if(pid == 0){
 				printf("I am a child\n");
-										//print to file
-						close(0); //0 is standard in, 1 is standard out
-						dup(fd1);
-						close(0);
-						//execv(x[0], x);
-				if(execv(x[0], x) == -1);
-					printf("%s\n", "command not found");
+						//print to file
+				if(stOut == true){
+					close(1); //0 is standard in, 1 is standard out
+					dup(fd1);
+
+	 				 for(int i = 1; i<size-1; i++){
+					 	printf("%s ", input[i]);
+					 }
+					 printf("\n");
+					 close(1);
+
+				 }
+						execv(x[0], x);
+				// if(execv(x[0], x) == -1);
+				// 	printf("%s\n", "command not found");
 
 				 //taken from recitation, needs correction
 				printf("it didnt work\n");
@@ -315,4 +352,4 @@ for(int i = 0; i<size; i++){
 				waitpid(pid, NULL, 0);
 			}
 		}
-}
+	}
