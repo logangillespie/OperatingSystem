@@ -243,7 +243,7 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 		printf("%d\n", tokens->size );
 
 
-		char *command, *output, *input1;
+		char *command, *input, *output;
 		bool arrow = false;
 		bool stOut = false;
 		bool stIn = false;
@@ -255,15 +255,12 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 				arrow = true;												//arrow in command
 					if(*tokens->items[i] == '>'){ // echo hello > input.txt //puts hello in input.txt
 						stOut = true;
-						command = tokens->items[0]; //command
-						printf("%s command\n", command);
 						output = tokens-> items[size-2];
 						//printf("output file: %s\n", output);
 					}
 					if(*tokens->items[i] == '<'){
 						stIn = true;
-						command = tokens -> items[0];
-						input1 = tokens->items[size-2];
+						input = tokens->items[size-2];
 					}
 				}
 		}
@@ -299,31 +296,16 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 		// 	printf("hehe: %s\n", x[i]);
 
 //file redirection stuff
+char *x2[size];
+if(stOut == true) // make x only command
+{
+	x2[0] = x[0];
+	printf("x2: %s\n", *x2);
+	x2[1] = '\0';
+}
 
-	char * input[size*size];
 
-if(arrow == true && stOut == true){
-	 //put if statement bc it will crash if there is no '>'
-		for(int i =1; i<size; i++){
-			if(*x[i] == '>')
-				break;
-			input[i] = x[i];
-			printf("%d", i );
-			printf(" %s ", input[i]);
-		}
-		input[size-1] = '\0';
-
-	}
-//cat < lakes.txt
-// if(arrow == true && stIn == true){
-// 	for(int i =1; i<size; i++){
-// 		if(*x[i] == '<')
-// 			break;
-// 		input[i] = x[i];
-// 	}
-// }
-
-			int	fd1 = open(output,O_RDWR | O_CREAT, 0777);
+			int	fd1 = open(output,O_RDWR| O_CREAT, 0777);
 			int pid = fork();
 			if(pid == 0){
 				printf("I am a child\n");
@@ -332,14 +314,22 @@ if(arrow == true && stOut == true){
 					close(1); //0 is standard in, 1 is standard out
 					dup(fd1);
 
-	 				 for(int i = 1; i<size-1; i++){
-					 	printf("%s ", input[i]);
-					 }
-					 printf("\n");
-					 close(1);
+					 close(fd1);
+
+					 if(execv(x2[0], x2) == -1){
+	 					printf("%s\n", "command not found");
+					}
 
 				 }
-						execv(x[0], x);
+		else if(stIn == true){
+					 close(0);
+					 dup(fd1);
+					 close(fd1);
+				 }
+
+				 else{
+						execv(x[0], x); //originally x
+					}
 				// if(execv(x[0], x) == -1);
 				// 	printf("%s\n", "command not found");
 
