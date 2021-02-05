@@ -247,6 +247,7 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 		bool arrow = false;
 		bool stOut = false;
 		bool stIn = false;
+		int numPipe = 0;
 
 
 		for(int i = 0; i<size; i++){
@@ -262,6 +263,9 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 						stIn = true;
 						input = tokens->items[size-2];
 					}
+				}
+				if(*tokens->items[i] == '|'){
+					numPipe++;
 				}
 		}
 
@@ -280,10 +284,6 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 				}
 		}
 	}
-	printf("this is the input %s\n", input);
-	printf("this is the output %s\n", output);
-	printf("this is the input spot %d\n", inSpot);
-	printf("this is the output spot %d\n", outSpot);
 
 		int fd;
 		char * x[size];
@@ -329,7 +329,7 @@ if(arrow == true) // make x only command
 			}
 		}
 	}
-		if(dash == true){
+		if(dash == true){  //ls > out.txt = x //ls /usr/bin/ls, /usr/bin/<, /usr/bin/out.txt
 				x2[0] = x[0];
 				x2[1] = x[1];
 				printf("%s\n", x2[1] );
@@ -341,28 +341,11 @@ if(arrow == true) // make x only command
 			x2[1] = '\0';
 		}
 
-
-
-		// int inArrow, outArrow;
-		// if(stOut == true && stIn == true){
-		// 		printf("%s\n", "made it here both");
-		// 		for(int i = 0; i<size-1; i++){
-		// 			if(*x[i] == '<')
-		// 				inArrow = i;
-		// 			if(*x[i] == '>')
-		// 				outArrow == i;
-		// 		}
-		// 		if(inArrow > outArrow){ //see which arrow comes first then open
-		//
-		// 		}
-		// }
-		bool larger = false;
 			if(stOut == true && stIn == true){
 				printf("%s\n", "made it here both");
-				if(inSpot > outSpot){
+				if(inSpot > outSpot){  //cmd < int > out
 					fd2 = open(input, O_RDONLY, 0777);
 					fd1 = open(output,O_RDWR| O_CREAT, 0777);
-					larger = true;
 				}
 				else{
 					fd1 = open(output,O_RDWR| O_CREAT, 0777);
@@ -379,10 +362,35 @@ if(arrow == true) // make x only command
 			fd2 = open(input, O_RDONLY, 0777);
 			printf("%s\n", "made it here std in only" );
 		}
+//Piping stuff starts here//
+int p_fds[2];
+if(numPipe > 0){
+	printf("pipe found\n");
+	if(numPipe == 1){
+		x2[0] = "/usr/bin/cat";
+		x2[1] = '\0';
+
+		x[1] = '\0';
+		printf("command2 %s\n", x2[0]);
+
+		pipe(p_fds);
+	}
+
+
+}
 		//	int	fd1 = open(output,O_RDWR| O_CREAT, 0777);
 			int pid = fork();
 			if(pid == 0){
 				printf("I am a child\n");
+
+				//close(1);
+				dup2(p_fds[1], 1);
+				close(p_fds[0]);
+			//	execv(x[0], x);
+			//	close(p_fds[1]);
+				//execv(x2[0], x2);
+
+			//	close(p_fds[1]);
 						//print to file
 				if(stIn == true && stOut == true){// && larger == true){
 					close(0);
@@ -422,18 +430,36 @@ if(arrow == true) // make x only command
 				 }
 
 				 else{
-						execv(x[0], x); //originally x
-					}
+					 if(execv(x[0], x) == -1){
+					 printf("%s\n", "command not found");
+				 }
+					//	exit(0); //change back to x
+
 				// if(execv(x[0], x) == -1);
 				// 	printf("%s\n", "command not found");
-
+			}
 				 //taken from recitation, needs correction
 				printf("it didnt work\n");
 			}
 			else
 			{
+				pid = fork();
+			if(pid == 0){
+				dup2(p_fds[0], 0);
+				close(p_fds[1]);
+				if(execv(x2[0], x2) == -1){
+				printf("%s\n", "command not found");
+			}
+		}
+		else{
+				close(p_fds[0]);
+				close(p_fds[1]);
+
+
+
 				printf("I am a parent\n");
 				waitpid(pid, NULL, 0);
+			}
 			}
 		}
 	}
