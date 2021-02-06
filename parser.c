@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 typedef struct {
 	int size;
 	char **items;
@@ -28,6 +29,7 @@ void tildeExpansion(char *token);
 void externalCommmand(tokenlist * tokenpath, tokenlist * tokens);
 void built_in(tokenlist * tokens);
 char * pathSearch(tokenlist * tokens, tokenlist * tokenpath);
+
 
 int main()
 {
@@ -57,6 +59,7 @@ int main()
 			if(hasTilde(newToken) == true){
 				tildeExpansion(newToken);
 			}
+
 
 			printf("%s\n", example );
 
@@ -232,69 +235,82 @@ void tildeExpansion(char *token){
 }
 void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 {
-
 	for(int i = 0; i < 10; i++){
-		int length = strlen(tokens->items[0]);
-		strncat(tokenpath->items[i], "/", 1);
-		strncat(tokenpath->items[i], tokens->items[0], length);
-		//printf("%s\n", tokenpath->items[i]);
+			int length = strlen(tokens->items[0]);
+			strncat(tokenpath->items[i], "/", 1);
+			strncat(tokenpath->items[i], tokens->items[0], length);
+			//printf("%s\n", tokenpath->items[i]);
+		}
+		int size = tokens->size;
+		printf("the size is: ");
+		printf("%d\n", tokens->size );
+
+
+		char *input, *output;
+		bool arrow = false;
+		bool stOut = false;
+		bool stIn = false;
+
+
+		for(int i = 0; i<size; i++){
+			if(*tokens->items[i] == '<' || *tokens->items[i] == '>'){ //checks if there
+				printf("%s\n", "found <, >" );
+				arrow = true;												//arrow in command
+					if(*tokens->items[i] == '>'){ // echo hello > input.txt //puts hello in input.txt
+						stOut = true;
+						output = tokens-> items[size-2];
+						//printf("output file: %s\n", output);
+					}
+					if(*tokens->items[i] == '<'){
+						stIn = true;
+						input = tokens->items[size-2];
+					}
+				}
+		}
+
+		int inSpot, outSpot;
+
+		if(stIn == true && stOut == true){ // this is for cmd with both < and >
+			for(int i = 0; i<size; i++){
+				if(*tokens->items[i] == '<'){
+					input = tokens->items[i+1];
+					inSpot = i+1;
+				}
+
+				if(*tokens->items[i] == '>'){
+					output = tokens->items[i+1];
+					outSpot = i+1;
+				}
+		}
 	}
-	int size = tokens->size;
-	printf("the size is: ");
-	printf("%d\n", tokens->size );
-	int fd;
-	char * x[size];
-	for(int i = 0; i < 10; i++){
-	fd = access(tokenpath->items[i], F_OK);
-	if(fd == -1)
-		;
-	else if(fd == 0){
-		//printf("fd: %d\n", fd);
-		x[0] = tokenpath->items[i];
-		break;
+	printf("this is the input %s\n", input);
+	printf("this is the output %s\n", output);
+	printf("this is the input spot %d\n", inSpot);
+	printf("this is the output spot %d\n", outSpot);
+
+		int fd;
+		char * x[size];
+		for(int i = 0; i < 10; i++){
+		fd = access(tokenpath->items[i], F_OK);
+		if(fd == -1)
+			;
+		else if(fd == 0){
+			//printf("fd: %d\n", fd);
+			x[0] = tokenpath->items[i];
+			break;
+		}
+			//printf("%s\n", "found");
 	}
-		//printf("%s\n", "found");
-}
-	if(fd == -1)
-		printf("%s\n", "command not found");
-	else{
-		if(size >= 2){
-	for(int i = 1; i < size; i++){
-		x[i] = tokens->items[i];
-		printf("tokens->items: %s\n", x[i]);
+
+		if(fd == -1)
+			printf("%s\n", "command not found");
+		else{
+			if(size >= 2){
+		for(int i = 1; i < size; i++){
+			x[i] = tokens->items[i];
+			//printf("tokens->items: %s\n", x[i]);
+		}
 	}
-<<<<<<< Updated upstream
-}
-	printf("the size is: ");
-	printf("%d\n", size );
-	 x[size-1] = NULL;
-	for(int i = 0; i < size; i++)
-		printf("hehe: %s\n", x[i]);
-	int pid = fork();
-	if(pid == 0){
-		printf("I am a child\n");
-		execv(x[0], x);
-	
-		 //taken from recitation, needs correction
-		printf("it didnt work\n");
-	}
-	else
-	{
-		printf("I am a parent\n");
-		waitpid(pid, NULL, 0);
-	}
-}
-
-}
-
-
-
-
-
-
-
-
-=======
 		printf("the size is: ");
 		printf("%d\n", size );
 		 x[size-1] = NULL;
@@ -341,11 +357,9 @@ if(arrow == true) // make x only command
 			fd1 = open(output,O_RDWR| O_CREAT, 0777);
 				printf("%s\n", "made it here std out only" );
 		}
->>>>>>> Stashed changes
 
+		if(stIn == true && stOut == false){
 
-<<<<<<< Updated upstream
-=======
 			fd2 = open(input, O_RDONLY, 0777);
 			printf("%s\n", "made it here std in only" );
 		}
@@ -427,7 +441,22 @@ if(arrow == true) // make x only command
 	}
 
 	char * pathSearch(tokenlist * tokens, tokenlist * tokenpath){
-		
-		
+		for(int i = 0; i < 10; i++){
+			int length = strlen(tokens->items[0]);
+			strncat(tokenpath->items[i], "/", 1);
+			strncat(tokenpath->items[i], tokens->items[0], length);
+			//printf("%s\n", tokenpath->items[i]);
+		}
+		for(int i = 0; i < 10; i++){
+		int fd = access(tokenpath->items[i], F_OK);
+		if(fd == -1)
+			;
+		else if(fd == 0){
+			//printf("fd: %d\n", fd);
+			return tokenpath->items[i];
+			break;
+		}
+			//printf("%s\n", "found");
 	}
->>>>>>> Stashed changes
+
+	}
