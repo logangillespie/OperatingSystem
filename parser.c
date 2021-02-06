@@ -26,6 +26,8 @@ void prompt ();
 bool hasTilde(char *token);
 void tildeExpansion(char *token);
 void externalCommmand(tokenlist * tokenpath, tokenlist * tokens);
+void built_in(tokenlist * tokens);
+char * pathSearch(tokenlist * tokens, tokenlist * tokenpath);
 
 int main()
 {
@@ -43,7 +45,8 @@ int main()
 		char *input = get_input();
 		printf("whole input: %s\n", input);
 		tokenlist *tokens = get_tokens(input);
-		externalCommmand(tokenpath, tokens);
+		//externalCommmand(tokenpath, tokens);
+		built_in(tokens);
 		//char *newToken, dollarCheck, command;
 		//makeArray(tokens);
 		for (int i = 0; i < tokens->size; i++) {
@@ -260,6 +263,7 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 		x[i] = tokens->items[i];
 		printf("tokens->items: %s\n", x[i]);
 	}
+<<<<<<< Updated upstream
 }
 	printf("the size is: ");
 	printf("%d\n", size );
@@ -290,5 +294,140 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 
 
 
+=======
+		printf("the size is: ");
+		printf("%d\n", size );
+		 x[size-1] = NULL;
+
+//file redirection stuff
+char *x2[size];
+int fd1, fd2;
+
+bool dash = false;
+if(arrow == true) // make x only command
+{
+	for(int i = 0; i<size-1;i++){ // checks for commands like ls -al
+		if(*x[i] == '-')
+			{
+				printf("%s\n", "found dash");
+				dash = true;
+			}
+		}
+	}
+		if(dash == true){
+				x2[0] = x[0];
+				x2[1] = x[1];
+				printf("%s\n", x2[1] );
+				x2[2] = '\0';
+			}
+		else{
+			x2[0] = x[0];
+			printf("x2: %s\n", *x2);
+			x2[1] = '\0';
+		}
+			if(stOut == true && stIn == true){
+				printf("%s\n", "made it here both");
+				if(inSpot > outSpot){
+					fd2 = open(input, O_RDONLY, 0777);
+					fd1 = open(output,O_RDWR| O_CREAT, 0777);
+					
+				}
+				else{
+					fd1 = open(output,O_RDWR| O_CREAT, 0777);
+					fd2 = open(input, O_RDONLY, 0777);
+				}
+			}
+		if(stOut == true && stIn == false){
+			fd1 = open(output,O_RDWR| O_CREAT, 0777);
+				printf("%s\n", "made it here std out only" );
+		}
+>>>>>>> Stashed changes
 
 
+<<<<<<< Updated upstream
+=======
+			fd2 = open(input, O_RDONLY, 0777);
+			printf("%s\n", "made it here std in only" );
+		}
+		//	int	fd1 = open(output,O_RDWR| O_CREAT, 0777);
+			int pid = fork();
+			if(pid == 0){
+				printf("I am a child\n");
+						//print to file
+				if(stIn == true && stOut == true){// && larger == true){
+					close(0);
+					dup(fd2);
+					close(fd2);
+
+					close(1); //0 is standard in, 1 is standard out
+					dup(fd1);
+					close(fd1);
+
+					if(execv(x2[0], x2) == -1){
+					 printf("%s\n", "command not found");
+				 }
+				}
+				// else if(stIn == true && stOut == true && larger == false){
+				//
+				// }
+				else if(stOut == true){
+					close(1); //0 is standard in, 1 is standard out
+					dup(fd1);
+
+					 close(fd1);
+
+					 if(execv(x2[0], x2) == -1){
+	 					printf("%s\n", "command not found");
+					}
+
+				 }
+		else if(stIn == true){
+					 close(0);
+					 dup(fd2);
+					 close(fd2);
+
+					 if(execv(x2[0], x2) == -1){
+	 					printf("%s\n", "command not found");
+					}
+				 }
+
+				 else{
+						execv(x[0], x); //originally x
+					}
+				// if(execv(x[0], x) == -1);
+				// 	printf("%s\n", "command not found");
+
+				 //taken from recitation, needs correction
+				printf("it didnt work\n");
+			}
+			else
+			{
+				printf("I am a parent\n");
+				waitpid(pid, NULL, 0);
+			}
+		}
+	}
+
+	void built_in(tokenlist * tokens){
+		if(strcmp(tokens->items[0], "cd") == 0){
+			if(tokens->size == 1)
+				chdir(getenv("HOME"));
+			//char * path = tokens->items[1];
+
+		}
+		else if(strcmp(tokens->items[0], "jobs") == 0){
+
+		}
+		else if(strcmp(tokens->items[0], "exit[2]") == 0){
+
+		}
+		else if(strcmp(tokens->items[0], "echo") == 0){
+
+		}
+	}
+
+	char * pathSearch(tokenlist * tokens, tokenlist * tokenpath){
+		
+		
+	}
+>>>>>>> Stashed changes
