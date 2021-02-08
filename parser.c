@@ -256,6 +256,7 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 		bool arrow = false;
 		bool stOut = false;
 		bool stIn = false;
+		bool background = false;
 		int numPipe = 0;
 
 
@@ -275,6 +276,9 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 				}
 				if(*tokens->items[i] == '|'){
 					numPipe++;
+				}
+				if(*tokens->items[i] == '&'){
+					background = true;
 				}
 		}
 
@@ -378,7 +382,7 @@ if(numPipe > 0){
 	}
 //back to redirection
 	//	int	fd1 = open(output,O_RDWR| O_CREAT, 0777);
-	if(arrow == true){
+else if(arrow == true){
 		printf("I have redirection\n");
 			int pid = fork();
 			if(pid == 0){
@@ -430,7 +434,34 @@ if(numPipe > 0){
 				printf("I am a parent\n");
 				waitpid(pid, NULL, 0);
 				}
+
 			}
+//background processing stuff here
+else	if(background == true){
+		int pid = fork();
+		if(pid == 0){
+			//setpgid(0, 0);
+			x[1] = '\0';
+			if(execv(x[0], x) == -1){
+			printf("%s\n", "command not found");
+		}
+		}
+		else{
+
+			pid_t status=waitpid(pid, NULL, WNOHANG);
+			printf("Status %d\n", status);
+			if(status != 0){
+				printf("%d\nStatus terminated", status);
+			}
+			printf("Pid %d\n", pid);
+		}
+	}
+
+	else{
+		if(execv(x[0], x) == -1){
+		printf("%s\n", "command not found");
+	}
+	}
 		}
 void onePipe(char* firstCommand[2], char* secondCommand[2]){
 	int p_fds[2];
