@@ -30,6 +30,7 @@ void tildeExpansion(char *token);
 void externalCommmand(tokenlist * tokenpath, tokenlist * tokens);
 void onePipe(char* firstCommand[2], char* secondCommand[2]);
 void twoPipes(char* firstCommand[2], char* secondCommand[2], char* thirdCommand[2]);
+char* commandPath(char* command);
 void exit_command();
 
 int main()
@@ -355,19 +356,24 @@ x2[1] = '\0';
 
 char *x3[2];
 if(numPipe > 0){
-x2[0] = "/usr/bin/cat";
-x2[1] = '\0';
-x3[0] = "/usr/bin/wc";
-x3[1] = '\0';
-x[1] = '\0';
-		printf("pipe found\n");
 		if(numPipe == 1){
-			printf("I have 1 pipe\n");
-			onePipe(x,x3);
+			x2[0] = commandPath(x[2]);
+			x2[1] = '\0';
+			x[1] = '\0';
+		//	printf("I have 1 pipe\n");
+			onePipe(x,x2);
 		}
-		else{ // numPipe = 2
-			printf("I have 2 pipes\n");
+		else if(numPipe == 2){ // numPipe = 2
+		//	printf("I have 2 pipes\n");
+		x2[0] = commandPath(x[2]);
+		x2[1] = '\0';
+		x3[0] = commandPath(x[4]);
+		x3[1] = '\0';
+		x[1] = '\0';
 			twoPipes(x,x2,x3);
+		}
+		else{
+			printf("%s\n", "Error: Too many pipes");
 		}
 	}
 //back to redirection
@@ -467,7 +473,7 @@ void twoPipes(char* firstCommand[2], char* secondCommand[2], char* thirdCommand[
 
 	int pid = fork();
 	if(pid == 0){
-			printf("%s\n", "in the first child1");
+		//	printf("%s\n", "in the first child1");
 		dup2(p_fds[1],1); //takes first command stdout and replaces w/ 2nd command write
 		for(int i = 0; i<4;i++){
 			close(p_fds[i]); //close pipes
@@ -480,7 +486,7 @@ void twoPipes(char* firstCommand[2], char* secondCommand[2], char* thirdCommand[
 		{
 			pid = fork();
 			if(pid == 0){
-				printf("%s\n", "in the second child");
+			//	printf("%s\n", "in the second child");
 				dup2(p_fds[0], 0); //second command stdin ->read of first
 				dup2(p_fds[3],1); //second command stdout -> write of third
 				for(int i = 0; i<4;i++){
@@ -493,7 +499,7 @@ void twoPipes(char* firstCommand[2], char* secondCommand[2], char* thirdCommand[
 			else{
 				pid = fork();
 				if(pid == 0){
-					printf("%s\n", "in the third child");
+				//	printf("%s\n", "in the third child");
 					dup2(p_fds[2], 0);
 					for(int i = 0; i<4;i++){
 						close(p_fds[i]); //close pipes
@@ -520,4 +526,12 @@ void exit_command()
 
     exit(0);
     //printf("Timestamp: %d\n",(int)time(NULL));
+}
+char* commandPath(char* command){
+	char* temp;
+	temp = malloc(sizeof(char*)*5);
+	strcpy(temp, "/usr/bin/");
+	strcat(temp, command);
+//	printf("this is the command path%s\n", temp);
+	return temp;
 }
