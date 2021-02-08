@@ -47,22 +47,30 @@ int main()
 		// 	printf("tokenpath %d: (%s)\n", i, tokenpath->items[i]);
 		//}
 		char *input = get_input();
-		printf("whole input: %s\n", input);
+	//	printf("whole input: %s\n", input);
 		tokenlist *tokens = get_tokens(input);
 		externalCommmand(tokenpath, tokens);
 		//char *newToken, dollarCheck, command;
 		//makeArray(tokens);
 		for (int i = 0; i < tokens->size; i++) {
 			//printf("token %d: (%s)\n", i, tokens->items[i]);
-			printf("token %d: (%s)\n", i, tokens->items[i]);
+		//	printf("token %d: (%s)\n", i, tokens->items[i]);
 			char *newToken = tokens->items[i]; // grabs individual words from sentence
 			char* example = returnenv(newToken);
 			if(hasTilde(newToken) == true){
 				tildeExpansion(newToken);
 			}
 
+			char* echo = "echo";
+		// 	if(strcmp(example, newToken) != 0 && strcmp(echo, newToken) != 0){
+		// 		printf("%s\n",example );
+		// 		}
+		// // 	else{
+		// 		printf("%s\n",example );
+		// }
 
-			printf("%s\n", example );
+
+		//	printf("%s\n", example );
 
 
 
@@ -202,9 +210,10 @@ char * returnenv(char * token){
 				if(tokenCheck(hasDollar) == true){
 					hasDollar = getenv(hasDollar);
 					//printf("%s\n", hasDollar );
-					return hasDollar;
+					//return hasDollar;
 				}
 			}
+		//	printf("Hasdollar %s\n", hasDollar );
 			return hasDollar;
 }
 
@@ -248,8 +257,8 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 			//printf("%s\n", tokenpath->items[i]);
 		}
 		int size = tokens->size;
-		printf("the size is: ");
-		printf("%d\n", tokens->size );
+	//	printf("the size is: ");
+	//	printf("%d\n", tokens->size );
 
 
 		char *input, *output;
@@ -277,7 +286,8 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 				if(*tokens->items[i] == '|'){
 					numPipe++;
 				}
-				if(*tokens->items[i] == '&'){
+				if(*tokens->items[size-2] == '&'){ //if last character is &
+					printf("background processing\n");
 					background = true;
 				}
 		}
@@ -323,8 +333,8 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 	}
 }
 
-		printf("the size is: ");
-		printf("%d\n", size );
+	//	printf("the size is: ");
+	//	printf("%d\n", size );
 		 x[size-1] = NULL;
 		// for(int i = 0; i < size; i++)
 		// 	printf("hehe: %s\n", x[i]);
@@ -434,7 +444,6 @@ else if(arrow == true){
 				printf("I am a parent\n");
 				waitpid(pid, NULL, 0);
 				}
-
 			}
 //background processing stuff here
 else	if(background == true){
@@ -445,9 +454,8 @@ else	if(background == true){
 			if(execv(x[0], x) == -1){
 			printf("%s\n", "command not found");
 		}
-		}
+	}
 		else{
-
 			pid_t status=waitpid(pid, NULL, WNOHANG);
 			printf("Status %d\n", status);
 			if(status != 0){
@@ -458,10 +466,16 @@ else	if(background == true){
 	}
 
 	else{
+		int pid = fork();
+		if(pid == 0){
 		if(execv(x[0], x) == -1){
 		printf("%s\n", "command not found");
 	}
-	}
+}
+	else{
+			waitpid(pid, NULL, 0);
+		}
+}
 		}
 void onePipe(char* firstCommand[2], char* secondCommand[2]){
 	int p_fds[2];
