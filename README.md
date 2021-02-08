@@ -14,7 +14,7 @@ Part 9 - all members
 Part 10 - all members
 
 File listing:
-Our program makes use of two files : a makefile and parser.c 
+Our program makes use of two files-- a makefile and parser.c 
 To compile the program make use of the makefile attached in the tar and an excutable name.
 
 Bugs:
