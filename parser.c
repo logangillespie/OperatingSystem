@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <time.h>
 typedef struct {
 	int size;
 	char **items;
@@ -27,9 +28,10 @@ void prompt ();
 bool hasTilde(char *token);
 void tildeExpansion(char *token);
 void externalCommmand(tokenlist * tokenpath, tokenlist * tokens);
-void built_in(tokenlist * tokens);
-char * pathSearch(tokenlist * tokens, tokenlist * tokenpath);
-
+void onePipe(char* firstCommand[2], char* secondCommand[2]);
+void twoPipes(char* firstCommand[2], char* secondCommand[2], char* thirdCommand[2]);
+char* commandPath(char* command);
+void exit_command();
 
 int main()
 {
@@ -45,15 +47,14 @@ int main()
 		// 	printf("tokenpath %d: (%s)\n", i, tokenpath->items[i]);
 		//}
 		char *input = get_input();
-		printf("whole input: %s\n", input);
+		//printf("whole input: %s\n", input);
 		tokenlist *tokens = get_tokens(input);
-		//externalCommmand(tokenpath, tokens);
-		built_in(tokens);
+		externalCommmand(tokenpath, tokens);
 		//char *newToken, dollarCheck, command;
 		//makeArray(tokens);
 		for (int i = 0; i < tokens->size; i++) {
 			//printf("token %d: (%s)\n", i, tokens->items[i]);
-			printf("token %d: (%s)\n", i, tokens->items[i]);
+			//printf("token %d: (%s)\n", i, tokens->items[i]);
 			char *newToken = tokens->items[i]; // grabs individual words from sentence
 			char* example = returnenv(newToken);
 			if(hasTilde(newToken) == true){
@@ -61,10 +62,21 @@ int main()
 			}
 
 
-			printf("%s\n", example );
+			//printf("%s\n", example );
+
 
 
 		}
+		if (strcmp(tokens->items[0],"exit") == 0)
+					{
+							exit_command();
+					}
+		if (strcmp(tokens->items[0],"cd") == 0)
+            {
+                //If no arguments are supplied, change the current working directory to $HOME
+                printf("%s\n", "you have entered cd");
+
+            }
 		free(input);
 		free_tokens(tokens);
 	}
@@ -242,19 +254,21 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 			//printf("%s\n", tokenpath->items[i]);
 		}
 		int size = tokens->size;
-		printf("the size is: ");
-		printf("%d\n", tokens->size );
+		//printf("the size is: ");
+		//printf("%d\n", tokens->size );
 
 
 		char *input, *output;
 		bool arrow = false;
 		bool stOut = false;
 		bool stIn = false;
+		bool background = false;
+		int numPipe = 0;
 
 
 		for(int i = 0; i<size; i++){
 			if(*tokens->items[i] == '<' || *tokens->items[i] == '>'){ //checks if there
-				printf("%s\n", "found <, >" );
+				//printf("%s\n", "found <, >" );
 				arrow = true;												//arrow in command
 					if(*tokens->items[i] == '>'){ // echo hello > input.txt //puts hello in input.txt
 						stOut = true;
@@ -265,6 +279,12 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 						stIn = true;
 						input = tokens->items[size-2];
 					}
+				}
+				if(*tokens->items[i] == '|'){
+					numPipe++;
+				}
+				if(*tokens->items[i] == '&'){
+					background = true;
 				}
 		}
 
@@ -283,10 +303,6 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 				}
 		}
 	}
-	printf("this is the input %s\n", input);
-	printf("this is the output %s\n", output);
-	printf("this is the input spot %d\n", inSpot);
-	printf("this is the output spot %d\n", outSpot);
 
 		int fd;
 		char * x[size];
@@ -311,42 +327,25 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 			//printf("tokens->items: %s\n", x[i]);
 		}
 	}
-		printf("the size is: ");
-		printf("%d\n", size );
+}
+
+		// printf("the size is: ");
+		// printf("%d\n", size );
 		 x[size-1] = NULL;
+		// for(int i = 0; i < size; i++)
+		// 	printf("hehe: %s\n", x[i]);
 
 //file redirection stuff
 char *x2[size];
 int fd1, fd2;
+x2[0] = x[0];
+x2[1] = '\0';
 
-bool dash = false;
-if(arrow == true) // make x only command
-{
-	for(int i = 0; i<size-1;i++){ // checks for commands like ls -al
-		if(*x[i] == '-')
-			{
-				printf("%s\n", "found dash");
-				dash = true;
-			}
-		}
-	}
-		if(dash == true){
-				x2[0] = x[0];
-				x2[1] = x[1];
-				printf("%s\n", x2[1] );
-				x2[2] = '\0';
-			}
-		else{
-			x2[0] = x[0];
-			printf("x2: %s\n", *x2);
-			x2[1] = '\0';
-		}
 			if(stOut == true && stIn == true){
-				printf("%s\n", "made it here both");
-				if(inSpot > outSpot){
+				//printf("%s\n", "made it here both");
+				if(inSpot > outSpot){  //cmd < int > out
 					fd2 = open(input, O_RDONLY, 0777);
 					fd1 = open(output,O_RDWR| O_CREAT, 0777);
-					
 				}
 				else{
 					fd1 = open(output,O_RDWR| O_CREAT, 0777);
@@ -355,19 +354,46 @@ if(arrow == true) // make x only command
 			}
 		if(stOut == true && stIn == false){
 			fd1 = open(output,O_RDWR| O_CREAT, 0777);
-				printf("%s\n", "made it here std out only" );
+				//printf("%s\n", "made it here std out only" );
 		}
 
 		if(stIn == true && stOut == false){
 
 			fd2 = open(input, O_RDONLY, 0777);
-			printf("%s\n", "made it here std in only" );
+			//printf("%s\n", "made it here std in only" );
 		}
-		//	int	fd1 = open(output,O_RDWR| O_CREAT, 0777);
+//Piping stuff starts here//
+
+char *x3[2];
+if(numPipe > 0){
+		if(numPipe == 1){
+			x2[0] = commandPath(x[2]);
+			x2[1] = '\0';
+			x[1] = '\0';
+		//	printf("I have 1 pipe\n");
+			onePipe(x,x2);
+		}
+		else if(numPipe == 2){ // numPipe = 2
+		//	printf("I have 2 pipes\n");
+		x2[0] = commandPath(x[2]);
+		x2[1] = '\0';
+		x3[0] = commandPath(x[4]);
+		x3[1] = '\0';
+		x[1] = '\0';
+			twoPipes(x,x2,x3);
+		}
+		else{
+			printf("%s\n", "Error: Too many pipes");
+		}
+	}
+//back to redirection
+	//	int	fd1 = open(output,O_RDWR| O_CREAT, 0777);
+else if(arrow == true){
+		//printf("I have redirection\n");
 			int pid = fork();
 			if(pid == 0){
-				printf("I am a child\n");
-						//print to file
+				//printf("I am a child\n");
+
 				if(stIn == true && stOut == true){// && larger == true){
 					close(0);
 					dup(fd2);
@@ -381,20 +407,15 @@ if(arrow == true) // make x only command
 					 printf("%s\n", "command not found");
 				 }
 				}
-				// else if(stIn == true && stOut == true && larger == false){
-				//
-				// }
 				else if(stOut == true){
 					close(1); //0 is standard in, 1 is standard out
 					dup(fd1);
-
-					 close(fd1);
-
+					close(fd1);
 					 if(execv(x2[0], x2) == -1){
 	 					printf("%s\n", "command not found");
 					}
 
-				 }
+			}
 		else if(stIn == true){
 					 close(0);
 					 dup(fd2);
@@ -403,60 +424,159 @@ if(arrow == true) // make x only command
 					 if(execv(x2[0], x2) == -1){
 	 					printf("%s\n", "command not found");
 					}
-				 }
+				}
 
 				 else{
-						execv(x[0], x); //originally x
-					}
-				// if(execv(x[0], x) == -1);
-				// 	printf("%s\n", "command not found");
-
+					 if(execv(x[0], x) == -1){
+					 printf("%s\n", "command not found");
+				 }
+			}
 				 //taken from recitation, needs correction
-				printf("it didnt work\n");
+				//printf("it didnt work\n");
 			}
-			else
+		else //parent function
 			{
-				printf("I am a parent\n");
+//store name of string from background process and create new string bc tokenlist will be freed up at some points
+				//printf("I am a parent\n");
 				waitpid(pid, NULL, 0);
+				}
+
+			}
+//background processing stuff here
+else	if(background == true){
+		int pid = fork();
+		if(pid == 0){
+			//setpgid(0, 0);
+			x[1] = '\0';
+			if(execv(x[0], x) == -1){
+			printf("%s\n", "command not found");
+		}
+		}
+		else{
+
+			pid_t status=waitpid(pid, NULL, WNOHANG);
+			printf("Status %d\n", status);
+			if(status != 0){
+				printf("%d\nStatus terminated", status);
+			}
+			printf("Pid %d\n", pid);
+		}
+	}
+
+	else{
+        int pid = fork();
+        if(pid == 0){
+        if(execv(x[0], x) == -1){
+        printf("%s\n", "command not found");
+    }
+}
+    else{
+            waitpid(pid, NULL, 0);
+        }
+}
+		}
+void onePipe(char* firstCommand[2], char* secondCommand[2]){
+	int p_fds[2];
+	pipe(p_fds);
+
+	int pid = fork();
+	if(pid == 0){
+	//	close(1);
+		dup2(p_fds[1], 1); //piping
+		close(p_fds[0]);
+		if(execv(firstCommand[0], firstCommand) == -1){
+			printf("%s\n", " command not found" );
+		}
+	}
+	else{
+		pid = fork();
+			if(pid == 0){
+				dup2(p_fds[0], 0); //piping
+				close(p_fds[1]);
+				if(execv(secondCommand[0], secondCommand) == -1){
+					printf("%s\n", " command not found" );
+				}
+			}
+				else{
+					close(p_fds[0]);
+					close(p_fds[1]);
+
+					//printf("I am a parent\n");
+					waitpid(pid, NULL, 0);
+				}
+	}
+
+}
+
+void twoPipes(char* firstCommand[2], char* secondCommand[2], char* thirdCommand[2]){
+	int p_fds[4];
+	int status;
+	pipe(p_fds); // for the first pipe
+	pipe(p_fds+2); //for the second pipe
+
+	int pid = fork();
+	if(pid == 0){
+		//	printf("%s\n", "in the first child1");
+		dup2(p_fds[1],1); //takes first command stdout and replaces w/ 2nd command write
+		for(int i = 0; i<4;i++){
+			close(p_fds[i]); //close pipes
+		}
+		if(execv(firstCommand[0], firstCommand) == -1){
+						printf("%s\n", "command not found");
+					}
+	}
+	else //fork second child {
+		{
+			pid = fork();
+			if(pid == 0){
+			//	printf("%s\n", "in the second child");
+				dup2(p_fds[0], 0); //second command stdin ->read of first
+				dup2(p_fds[3],1); //second command stdout -> write of third
+				for(int i = 0; i<4;i++){
+					close(p_fds[i]); //close pipes
+				}
+				if(execv(secondCommand[0], secondCommand) == -1){
+				printf("%s\n", "command not found");
 			}
 		}
-	}
-
-	void built_in(tokenlist * tokens){
-		if(strcmp(tokens->items[0], "cd") == 0){
-			if(tokens->size == 1)
-				chdir(getenv("HOME"));
-			//char * path = tokens->items[1];
-
+			else{
+				pid = fork();
+				if(pid == 0){
+				//	printf("%s\n", "in the third child");
+					dup2(p_fds[2], 0);
+					for(int i = 0; i<4;i++){
+						close(p_fds[i]); //close pipes
+					}
+					if(execv(thirdCommand[0], thirdCommand) == -1){
+					printf("%s\n", "command not found");
+					}
+				}
+			}
 		}
-		else if(strcmp(tokens->items[0], "jobs") == 0){
-
+		for(int i = 0; i<4;i++){
+			close(p_fds[i]); //close pipes
 		}
-		else if(strcmp(tokens->items[0], "exit[2]") == 0){
+		for(int i = 0; i<3; i++)
+			wait(&status);
+}
+void exit_command()
+{
+    printf("Shell ran for %d",(int)time(NULL));
+    printf("%s"," seconds and took " );
+    //print((Get-History)[-1].EndExecutionTime - (Get-History)[-1].StartExecutionTime)
+    printf("%d", '$end_time - $start_time');
+    printf("%s\n"," seconds to execute one command" );
 
-		}
-		else if(strcmp(tokens->items[0], "echo") == 0){
+    exit(0);
+    //printf("Timestamp: %d\n",(int)time(NULL));
+}
+char* commandPath(char* command){
+	char* temp;
+	temp = malloc(sizeof(char*)*5);
+	strcpy(temp, "/usr/bin/");
+	strcat(temp, command);
+//	printf("this is the command path%s\n", temp);
+	return temp;
+}
 
-		}
-	}
 
-	char * pathSearch(tokenlist * tokens, tokenlist * tokenpath){
-		for(int i = 0; i < 10; i++){
-			int length = strlen(tokens->items[0]);
-			strncat(tokenpath->items[i], "/", 1);
-			strncat(tokenpath->items[i], tokens->items[0], length);
-			//printf("%s\n", tokenpath->items[i]);
-		}
-		for(int i = 0; i < 10; i++){
-		int fd = access(tokenpath->items[i], F_OK);
-		if(fd == -1)
-			;
-		else if(fd == 0){
-			//printf("fd: %d\n", fd);
-			return tokenpath->items[i];
-			break;
-		}
-			//printf("%s\n", "found");
-	}
-
-	}
