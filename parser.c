@@ -456,12 +456,19 @@ else	if(background == true){
 		}
 	}
 		else{
+<<<<<<< Updated upstream
 			pid_t status=waitpid(pid, NULL, WNOHANG);
+=======
+
+			int status;
+			waitpid(pid, &status, WNOHANG);
+>>>>>>> Stashed changes
 			printf("Status %d\n", status);
 			if(status != 0){
 				printf("%d\nStatus terminated", status);
 			}
 			printf("Pid %d\n", pid);
+			printf("status %d\n", status);
 		}
 	}
 
