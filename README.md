@@ -31,3 +31,5 @@ background redirection does not work properly
 longest command time only works when at least one command is attempted
 
 tilde expansion only prints does not change 
+
+exit command prints status twice
