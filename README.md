@@ -19,3 +19,4 @@ To compile the program make use of the makefile attached in the tar and an excut
 
 Bugs:
 
+We attempted the background processing but we are unsure on how to get the status to terminate. Therefore, we are unable to complete the jobs part listed in part 10 .
