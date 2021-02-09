@@ -13,4 +13,4 @@ parser.o: parser.c
 Clean: 
 	rm -f*.o* .x
 run: compile 
-	./parser.x
+	./shell
