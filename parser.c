@@ -69,6 +69,36 @@ int main()
 					{
 							exit_command();
 					}
+		else if(strcmp(tokens->items[0], "cd") == 0){
+			char cwd[256];
+			if(tokens->size == 2){
+				const char* home = getenv("HOME");
+				chdir(home);
+    	if (getcwd(cwd, sizeof(cwd)) == NULL)
+      perror("getcwd() error");
+    	else
+      //printf("current working directory is: %s\n", cwd);
+  
+  			setenv("PWD", cwd, 1);
+}
+	else if(tokens->size == 3){
+		//printf("%s\n naenae: ", tokens->items[1]);
+		const char* directory = tokens->items[1];
+				chdir(directory);
+    	if (getcwd(cwd, sizeof(cwd)) == NULL)
+      perror("getcwd() error");
+    	else
+      //printf("current working directory is: %s\n", cwd);
+  
+  			setenv("PWD", cwd, 1);
+
+	}
+
+	else if(tokens->size == 4)
+			printf("%s\n", "Too many arguments");
+
+ 
+		}
 		free(input);
 		free_tokens(tokens);
 	}
