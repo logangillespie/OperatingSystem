@@ -35,8 +35,12 @@ void exit_command();
 
 int main()
 {
-
+	time_t begin = time(NULL);
+	time_t biggesttime = time(NULL);
+	time_t begincycle = 0;
+	time_t currenttime = time(NULL);
 	while (1) {
+		begincycle = time(NULL);
 		prompt();
 
 		/* input contains the whole command
@@ -63,11 +67,16 @@ int main()
 
 			char* echo = "echo";
 		
-
 		}
 		if (strcmp(tokens->items[0],"exit") == 0)
 					{
-							exit_command();
+						time_t end = time(NULL);
+						printf("Shell ran for %ld seconds", (end - begin));
+                printf(" and took ");
+                printf("%ld", biggesttime); 
+                printf(" seconds to execute one command.");
+                printf("\n"); 
+                   exit(0);
 					}
 		else if(strcmp(tokens->items[0], "cd") == 0){
 			char cwd[256];
@@ -99,10 +108,13 @@ int main()
 
  
 		}
+		time_t endcycle = time(NULL);
+	biggesttime = endcycle - begincycle;
+	if(biggesttime > currenttime)
+		biggesttime = currenttime;
 		free(input);
 		free_tokens(tokens);
 	}
-
 	return 0;
 }
 
@@ -292,7 +304,7 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 
 		for(int i = 0; i<size; i++){
 			if(*tokens->items[i] == '<' || *tokens->items[i] == '>'){ //checks if there
-				printf("%s\n", "found <, >" );
+				//printf("%s\n", "found <, >" );
 				arrow = true;												//arrow in command
 					if(*tokens->items[i] == '>'){ // echo hello > input.txt //puts hello in input.txt
 						stOut = true;
@@ -308,7 +320,7 @@ void externalCommmand(tokenlist * tokenpath, tokenlist * tokens)
 					numPipe++;
 				}
 				if(*tokens->items[size-2] == '&'){ //if last character is &
-					printf("background processing\n");
+					//printf("background processing\n");
 					background = true;
 				}
 		}
@@ -367,7 +379,7 @@ x2[0] = x[0];
 x2[1] = '\0';
 
 			if(stOut == true && stIn == true){
-				printf("%s\n", "made it here both");
+				//printf("%s\n", "made it here both");
 				if(inSpot > outSpot){  //cmd < int > out
 					fd2 = open(input, O_RDONLY, 0777);
 					fd1 = open(output,O_RDWR| O_CREAT, 0777);
@@ -379,13 +391,13 @@ x2[1] = '\0';
 			}
 		if(stOut == true && stIn == false){
 			fd1 = open(output,O_RDWR| O_CREAT, 0777);
-				printf("%s\n", "made it here std out only" );
+				//printf("%s\n", "made it here std out only" );
 		}
 
 		if(stIn == true && stOut == false){
 
 			fd2 = open(input, O_RDONLY, 0777);
-			printf("%s\n", "made it here std in only" );
+			//printf("%s\n", "made it here std in only" );
 		}
 //Piping stuff starts here//
 
@@ -414,10 +426,10 @@ if(numPipe > 0){
 //back to redirection
 	//	int	fd1 = open(output,O_RDWR| O_CREAT, 0777);
 else if(arrow == true){
-		printf("I have redirection\n");
+		//printf("I have redirection\n");
 			int pid = fork();
 			if(pid == 0){
-				printf("I am a child\n");
+				//printf("I am a child\n");
 
 				if(stIn == true && stOut == true){// && larger == true){
 					close(0);
@@ -457,12 +469,12 @@ else if(arrow == true){
 				 }
 			}
 				 //taken from recitation, needs correction
-				printf("it didnt work\n");
+				//printf("it didnt work\n");
 			}
 		else //parent function
 			{
 //store name of string from background process and create new string bc tokenlist will be freed up at some points
-				printf("I am a parent\n");
+				//printf("I am a parent\n");
 				waitpid(pid, NULL, 0);
 				}
 			}
@@ -487,16 +499,19 @@ else	if(background == true){
 	}
 
 	else{
-		int pid = fork();
-		if(pid == 0){
-		if(execv(x[0], x) == -1){
-		printf("%s\n", "command not found");
-	}
-}
-	else{
-			waitpid(pid, NULL, 0);
-		}
-}
+            char * exit = "exit";
+        int pid = fork();
+        if(pid == 0){
+            if(execv(x[0], x) == -1){
+                        if(strcmp(x[0], exit) != 0){
+           printf("%s\n", "command not found");
+                    }
+            }
+            }
+        else{
+            waitpid(pid, NULL, 0);
+        }
+            }
 		}
 void onePipe(char* firstCommand[2], char* secondCommand[2]){
 	int p_fds[2];
@@ -524,7 +539,7 @@ void onePipe(char* firstCommand[2], char* secondCommand[2]){
 					close(p_fds[0]);
 					close(p_fds[1]);
 
-					printf("I am a parent\n");
+					//printf("I am a parent\n");
 					waitpid(pid, NULL, 0);
 				}
 	}
@@ -582,17 +597,7 @@ void twoPipes(char* firstCommand[2], char* secondCommand[2], char* thirdCommand[
 		for(int i = 0; i<3; i++)
 			wait(&status);
 }
-void exit_command()
-{
-    printf("Shell ran for %d",(int)time(NULL));
-    printf("%s"," seconds and took " );
-    //print((Get-History)[-1].EndExecutionTime - (Get-History)[-1].StartExecutionTime)
-    printf("%d", '$end_time - $start_time');
-    printf("%s\n"," seconds to execute one command" );
 
-    exit(0);
-    //printf("Timestamp: %d\n",(int)time(NULL));
-}
 char* commandPath(char* command){
 	char* temp;
 	temp = malloc(sizeof(char*)*5);
