@@ -20,3 +20,14 @@ To compile the program make use of the makefile attached in the tar and an excut
 Bugs:
 
 We attempted the background processing but we are unable to print done.Therefore, we are unable to complete the jobs part listed in part 10 .
+
+warning: implicit declaration of function ‘setenv’ [-Wimplicit-function-declaration]
+      setenv("PWD", cwd, 1);
+      
+jobs are not done
+
+background redirection does not work properly
+
+longest command time only works when at least one command is attempted
+
+tilde expansion only prints does not change 
